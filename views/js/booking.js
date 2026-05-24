@@ -62,7 +62,7 @@ async function loadTimeline() {
         const bookings = Array.isArray(data) ? data : [];
 
         if (!bookings.length) {
-            chips.innerHTML = '<span class="no-bookings-msg">✅ No approved bookings — ground is free all day!</span>';
+            chips.innerHTML = '<span class="no-bookings-msg"><i class="fas fa-check-circle"></i> No approved bookings — ground is free all day!</span>';
             return;
         }
 
@@ -121,9 +121,9 @@ async function loadBookings() {
 
 function statusBadge(status) {
     const map = {
-        pending:  { cls: "badge-pending",  label: "⏳ Pending" },
-        approved: { cls: "badge-approved", label: "✅ Approved" },
-        rejected: { cls: "badge-rejected", label: "❌ Rejected" },
+        pending:  { cls: "badge-pending",  label: '<i class="fas fa-clock"></i> Pending' },
+        approved: { cls: "badge-approved", label: '<i class="fas fa-check-circle"></i> Approved' },
+        rejected: { cls: "badge-rejected", label: '<i class="fas fa-times-circle"></i> Rejected' },
     };
     const s = map[status] || { cls: "badge-pending", label: status };
     return `<span class="status-badge ${s.cls}">${s.label}</span>`;
