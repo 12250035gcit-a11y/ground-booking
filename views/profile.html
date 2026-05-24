@@ -125,6 +125,18 @@ if (user.first_name) {
     document.getElementById("userStudentId").textContent = "ID: " + (user.student_id || "—");
 }
 
+// Pre-fill profile form from logged-in user
+if (user.email) {
+    const emailEl = document.getElementById("email");
+    emailEl.value = user.email;
+    emailEl.readOnly = true;
+    emailEl.style.background = "var(--green-bg)";
+    emailEl.style.cursor = "default";
+}
+if (user.phone) {
+    document.getElementById("phone").value = user.phone;
+}
+
 // Load bookings for history
 async function loadHistory() {
     try {
@@ -140,14 +152,22 @@ async function loadHistory() {
             return;
         }
 
-        tbody.innerHTML = list.slice(0, 5).map(b => `
+        const badgeMap = {
+            pending:  { cls: 'status-pending',  label: 'Pending' },
+            approved: { cls: 'status-approved', label: 'Approved' },
+            rejected: { cls: 'status-rejected', label: 'Rejected' },
+        };
+
+        tbody.innerHTML = list.slice(0, 5).map(b => {
+            const badge = badgeMap[b.status] || { cls: 'status-pending', label: b.status };
+            return `
             <tr>
                 <td>${b.date}</td>
                 <td>${b.starting_time} – ${b.ending_time}</td>
                 <td>${b.match_type || "—"}</td>
-                <td><span class="status-badge confirmed">Confirmed</span></td>
-            </tr>
-        `).join('');
+                <td><span class="status-badge ${badge.cls}">${badge.label}</span></td>
+            </tr>`;
+        }).join('');
     } catch {
         document.getElementById("historyBody").innerHTML =
             `<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted);">Could not load history</td></tr>`;

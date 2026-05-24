@@ -5,10 +5,11 @@ const TIMELINE_START = 6;   // 6am
 const TIMELINE_END   = 22;  // 10pm
 const TIMELINE_HOURS = TIMELINE_END - TIMELINE_START;
 
+const _user = JSON.parse(localStorage.getItem("user") || "{}");
+
 document.addEventListener("DOMContentLoaded", () => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const sid = document.getElementById("studentId");
-    if (sid && user.student_id) sid.value = user.student_id;
+    if (sid && _user.email) sid.value = _user.email;
 
     setupDate();
     buildTimelineHours();
@@ -221,7 +222,7 @@ async function deleteBooking(id) {
 }
 
 function resetForm() {
-    document.getElementById("studentId").value = "";
+    document.getElementById("studentId").value = _user.email || "";
     document.getElementById("purpose").value = "";
     document.getElementById("startTime").value = "";
     document.getElementById("endTime").value = "";
