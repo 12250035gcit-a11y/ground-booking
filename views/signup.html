@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up – GCIT Ground Booking</title>
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body class="auth-page">
+
+<div class="auth-box">
+    <div class="auth-logo">
+        <img src="photos/logo.png" alt="GCIT Logo">
+    </div>
+
+    <h2>Create Account</h2>
+    <p class="subtitle">Your account will be reviewed by an admin before activation</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="form-group">
+        <label for="firstname">First Name</label>
+        <input type="text" id="firstname" placeholder="First name" autocomplete="given-name">
+    </div>
+
+    <div class="form-group">
+        <label for="lastname">Last Name</label>
+        <input type="text" id="lastname" placeholder="Last name" autocomplete="family-name">
+    </div>
+
+    <div class="form-group">
+        <label for="number">Phone Number</label>
+        <input type="tel" id="number" placeholder="+975 17 xxx xxx" autocomplete="tel">
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
+    </div>
+
+    <button class="btn-auth" onclick="signup()">Create Account</button>
+
+    <div class="auth-footer">
+        <p>Already have an account? <a href="index.html">Sign in</a></p>
+    </div>
+</div>
+
+<script>
+function signup() {
+    const errorEl = document.getElementById("errorMsg");
+    errorEl.style.display = "none";
+
+    const data = {
+        first_name: document.getElementById("firstname").value.trim(),
+        last_name: document.getElementById("lastname").value.trim(),
+        phone: document.getElementById("number").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value,
+    };
+    const confirm = document.getElementById("confirmPassword").value;
+
+    if (!data.first_name || !data.last_name || !data.phone || !data.email || !data.password) {
+        errorEl.textContent = "Please fill in all fields";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    if (data.password !== confirm) {
+        errorEl.textContent = "Passwords do not match";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    fetch("/user/add", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.error) {
+            errorEl.textContent = "Email already registered. Please login instead.";
+            errorEl.style.display = "block";
+            return;
+        }
+        alert("Account created! Please wait for admin approval before signing in.");
+        window.location.href = "index.html";
+    })
+    .catch(() => {
+        errorEl.textContent = "Network error. Please try again.";
+        errorEl.style.display = "block";
+    });
+}
+</script>
+</body>
+</html>

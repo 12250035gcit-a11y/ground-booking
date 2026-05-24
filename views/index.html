@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login – GCIT Ground Booking</title>
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body class="auth-page">
+
+<div class="auth-box">
+    <div class="auth-logo">
+        <img src="photos/logo.png" alt="GCIT Logo">
+    </div>
+
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to your GCIT account</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-auth" onclick="login()">Sign In</button>
+
+    <div class="auth-footer">
+        <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+        <p style="margin-top:10px;">Admin? <a href="admin-login.html">Admin login →</a></p>
+    </div>
+</div>
+
+<script src="js/login.js"></script>
+</body>
+</html>

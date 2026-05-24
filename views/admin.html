@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard – GCIT Ground Booking</title>
+    <link rel="stylesheet" href="css/home.css">
+    <style>
+        .pending-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--red);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin-left: 6px;
+            line-height: 1;
+        }
+        .badge-pending  { background: #fff3cd; color: #7d5a00; }
+        .badge-approved { background: #d8f3dc; color: #1a3a2a; }
+        .badge-rejected { background: #fde8e8; color: #8b1a1a; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-logo">
+        <img src="photos/logo.png" alt="GCIT Logo">
+        <div>
+            <div class="nav-logo-text">GCIT Ground Booking</div>
+            <div class="nav-logo-sub">Admin Dashboard</div>
+        </div>
+    </div>
+
+    <nav id="mainNav">
+        <ul>
+            <li><a href="admin.html" class="active-link">Dashboard</a></li>
+        </ul>
+    </nav>
+
+    <button class="btn-logout" onclick="adminLogout()">Logout</button>
+    <button class="hamburger" onclick="toggleNav()" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+<div class="page-hero">
+    <h1>Admin Dashboard</h1>
+    <p>Manage user registrations and ground booking approvals</p>
+</div>
+
+<div class="admin-layout">
+
+    <!-- Stats -->
+    <div class="admin-stats" id="statsRow">
+        <div class="stat-card">
+            <div class="num" id="statTotal">–</div>
+            <div class="lbl">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statPending">–</div>
+            <div class="lbl">Pending Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statApproved">–</div>
+            <div class="lbl">Approved Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statBookings">–</div>
+            <div class="lbl">Total Bookings</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statPendingBookings">–</div>
+            <div class="lbl">Pending Bookings</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchTab('users', this)">User Registrations</button>
+        <button class="admin-tab" id="bookingTabBtn" onclick="switchTab('bookings', this)">
+            Booking Approvals
+        </button>
+        <button class="admin-tab" onclick="switchTab('allbookings', this)">All Bookings</button>
+    </div>
+
+    <!-- Users Tab -->
+    <div class="tab-pane active" id="tab-users">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersList">
+                    <tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Booking Approvals Tab -->
+    <div class="tab-pane" id="tab-bookings">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student ID</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Notes</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingBookingsList">
+                    <tr><td colspan="8" style="text-align:center;padding:20px;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- All Bookings Tab -->
+    <div class="tab-pane" id="tab-allbookings">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student ID</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="adminBookingsList">
+                    <tr><td colspan="7" style="text-align:center;padding:20px;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    <strong>GCIT Ground Booking System</strong>
+    <span class="footer-accent"> — </span>
+    Admin Panel &copy; 2025
+</footer>
+
+<script src="js/admin.js"></script>
+<script>
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+}
+
+function toggleNav() {
+    document.getElementById('mainNav').classList.toggle('open');
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadUsersWithStats();
+    loadAllBookingsWithStats();
+});
+
+async function loadUsersWithStats() {
+    try {
+        const res = await fetch("/admin/users");
+        const users = await res.json();
+        const list = Array.isArray(users) ? users : [];
+        renderUsers(list);
+        document.getElementById("statTotal").textContent = list.length;
+        document.getElementById("statPending").textContent = list.filter(u => u.status === "pending").length;
+        document.getElementById("statApproved").textContent = list.filter(u => u.status === "approved").length;
+    } catch(e) { console.error(e); }
+}
+
+async function loadAllBookingsWithStats() {
+    try {
+        const res = await fetch("/bookings");
+        const bookings = await res.json();
+        const list = Array.isArray(bookings) ? bookings : [];
+
+        const pending = list.filter(b => b.status === "pending");
+
+        renderAdminBookings(list);
+        renderPendingBookings(pending);
+
+        document.getElementById("statBookings").textContent = list.length;
+        document.getElementById("statPendingBookings").textContent = pending.length;
+
+        // Show badge on tab if there are pending bookings
+        const tabBtn = document.getElementById("bookingTabBtn");
+        tabBtn.innerHTML = 'Booking Approvals' +
+            (pending.length ? `<span class="pending-badge">${pending.length}</span>` : '');
+
+    } catch(e) { console.error(e); }
+}
+
+function statusBadge(status) {
+    const map = {
+        pending:  { cls: "badge-pending",  label: "⏳ Pending" },
+        approved: { cls: "badge-approved", label: "✅ Approved" },
+        rejected: { cls: "badge-rejected", label: "❌ Rejected" },
+    };
+    const s = map[status] || { cls: "badge-pending", label: status };
+    return `<span class="status-badge ${s.cls}">${s.label}</span>`;
+}
+
+function renderPendingBookings(bookings) {
+    const tbody = document.getElementById("pendingBookingsList");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (!bookings.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);">✅ No pending bookings — all caught up!</td></tr>`;
+        return;
+    }
+
+    bookings.forEach(b => {
+        const row = document.createElement("tr");
+        row.id = `pending-row-${b.id}`;
+        row.innerHTML = `
+            <td>${b.id}</td>
+            <td><strong>${b.student_id}</strong></td>
+            <td>${b.match_type || "–"}</td>
+            <td>${b.date}</td>
+            <td>${b.starting_time} – ${b.ending_time}</td>
+            <td style="max-width:160px;font-size:12px;color:var(--text-muted);">${b.notes || "–"}</td>
+            <td>${statusBadge(b.status)}</td>
+            <td class="action-cell">
+                <button class="btn-approve" onclick="approveBooking(${b.id})">Approve</button>
+                <button class="btn-reject"  onclick="rejectBooking(${b.id})">Reject</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function renderAdminBookings(bookings) {
+    const tbody = document.getElementById("adminBookingsList");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (!bookings.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">No bookings found</td></tr>`;
+        return;
+    }
+
+    bookings.forEach(b => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${b.id}</td>
+            <td>${b.student_id}</td>
+            <td>${b.match_type || "–"}</td>
+            <td>${b.date}</td>
+            <td>${b.starting_time} – ${b.ending_time}</td>
+            <td>${statusBadge(b.status)}</td>
+            <td>
+                <button class="btn-reject" onclick="deleteAdminBooking(${b.id})">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+async function approveBooking(id) {
+    if (!confirm("Approve this booking?")) return;
+    try {
+        const res = await fetch(`/booking/${id}/approve`, { method: "PUT" });
+        if (res.ok) loadAllBookingsWithStats();
+        else alert("Failed to approve booking");
+    } catch { alert("Server error"); }
+}
+
+async function rejectBooking(id) {
+    if (!confirm("Reject this booking?")) return;
+    try {
+        const res = await fetch(`/booking/${id}/reject`, { method: "PUT" });
+        if (res.ok) loadAllBookingsWithStats();
+        else alert("Failed to reject booking");
+    } catch { alert("Server error"); }
+}
+
+async function deleteAdminBooking(id) {
+    if (!confirm("Delete this booking permanently?")) return;
+    try {
+        const res = await fetch(`/booking/${id}`, { method: "DELETE" });
+        if (res.ok) loadAllBookingsWithStats();
+        else alert("Failed to delete booking");
+    } catch { alert("Server error"); }
+}
+</script>
+</body>
+</html>

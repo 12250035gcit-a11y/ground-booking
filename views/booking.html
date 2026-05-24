@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking – GCIT Ground Booking</title>
+    <link rel="stylesheet" href="css/home.css">
+    <style>
+        /* ---- Timeline ---- */
+        .timeline-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .timeline-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--green-dark);
+        }
+        .timeline-date-pick {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .timeline-date-pick input[type="date"] {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-family: inherit;
+            font-size: 13px;
+            background: var(--green-bg);
+            color: var(--text);
+            outline: none;
+        }
+        .timeline-date-pick input[type="date"]:focus {
+            border-color: var(--green-mid);
+        }
+        .timeline-bar {
+            position: relative;
+            background: var(--green-bg);
+            border-radius: var(--radius-sm);
+            height: 54px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .timeline-hours {
+            display: flex;
+            height: 100%;
+        }
+        .timeline-hour {
+            flex: 1;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 2px 3px;
+        }
+        .timeline-hour:last-child { border-right: none; }
+        .timeline-hour-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .timeline-booked-slot {
+            position: absolute;
+            top: 4px;
+            height: calc(100% - 20px);
+            background: linear-gradient(135deg, #e63946cc, #e6394699);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: default;
+            border: 1px solid rgba(230,57,70,0.4);
+        }
+        .timeline-booked-slot:hover { z-index: 10; }
+        .timeline-booked-label {
+            font-size: 10px;
+            color: white;
+            font-weight: 700;
+            white-space: nowrap;
+            padding: 0 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .timeline-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        .legend-dot.booked { background: #e63946; }
+        .legend-dot.free { background: var(--green-pale); border: 1px solid var(--green-light); }
+
+        .booked-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .booked-chip {
+            background: #fde8e8;
+            border: 1px solid #f5c6c6;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #8b1a1a;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .booked-chip-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--red);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .no-bookings-msg {
+            font-size: 13px;
+            color: var(--green-mid);
+            font-weight: 600;
+            padding: 8px 0;
+        }
+
+        /* Status badge overrides */
+        .badge-pending  { background: #fff3cd; color: #7d5a00; }
+        .badge-approved { background: #d8f3dc; color: #1a3a2a; }
+        .badge-rejected { background: #fde8e8; color: #8b1a1a; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-logo">
+        <img src="photos/logo.png" alt="GCIT Logo">
+        <div>
+            <div class="nav-logo-text">GCIT Ground Booking</div>
+            <div class="nav-logo-sub">Gyalpozhing College of IT</div>
+        </div>
+    </div>
+    <nav id="mainNav">
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="about.html">Available Ground</a></li>
+            <li><a href="booking.html" class="active-link">Booking</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+    <button class="hamburger" onclick="toggleNav()" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+<div class="page-hero">
+    <h1>Football Ground Booking</h1>
+    <p>Submit a booking request — it will be confirmed once approved by admin</p>
+</div>
+
+<div class="booking-layout">
+
+    <!-- Left: Timeline + My Bookings -->
+    <div>
+
+        <!-- Timeline of booked slots -->
+        <div class="timeline-section">
+            <div class="timeline-header">
+                <span class="timeline-title">📅 Ground Availability</span>
+                <div class="timeline-date-pick">
+                    <label for="timelineDate" style="font-size:12px;font-weight:700;color:var(--text-muted);">DATE</label>
+                    <input type="date" id="timelineDate" onchange="loadTimeline()">
+                </div>
+            </div>
+
+            <div class="timeline-bar" id="timelineBar">
+                <!-- Hour markers -->
+                <div class="timeline-hours" id="timelineHours"></div>
+                <!-- Booked overlays injected by JS -->
+            </div>
+
+            <div class="timeline-legend">
+                <div class="legend-item"><div class="legend-dot booked"></div>Booked (approved)</div>
+                <div class="legend-item"><div class="legend-dot free"></div>Available</div>
+            </div>
+
+            <div class="booked-list" id="bookedChips"></div>
+        </div>
+
+        <!-- My Bookings table -->
+        <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+                <h3 style="font-family:'DM Serif Display',serif;font-size:1.3rem;font-weight:400;color:var(--green-dark);">My Bookings</h3>
+                <button onclick="loadBookings()" style="background:var(--green-bg);border:1px solid var(--border);color:var(--green-mid);padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">↻ Refresh</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsList">
+                        <tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Booking Form -->
+    <div class="booking-panel">
+        <h3 class="panel-title">New Booking Request</h3>
+
+        <div style="background:#fff3cd;border:1px solid #ffd966;border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#7d5a00;font-weight:500;margin-bottom:16px;">
+            ⏳ Bookings require admin approval before being confirmed.
+        </div>
+
+        <div class="form-group">
+            <label for="studentId">Student ID</label>
+            <input id="studentId" placeholder="e.g. GCIT2024001">
+        </div>
+
+        <div class="form-group">
+            <label for="purpose">Booking Type</label>
+            <select id="purpose">
+                <option value="">Select type</option>
+                <option>Practice</option>
+                <option>Match</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="bookDate">Date</label>
+            <input type="date" id="bookDate" onchange="syncTimeline()">
+        </div>
+
+        <div class="form-group">
+            <label>Time Slot</label>
+            <div class="time-row">
+                <input type="time" id="startTime" title="Start time">
+                <input type="time" id="endTime" title="End time">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes (optional)</label>
+            <textarea id="notes" placeholder="Any additional information..."></textarea>
+        </div>
+
+        <button class="btn-book" onclick="submitBooking()">Submit Booking Request</button>
+    </div>
+
+</div>
+
+<footer>
+    <strong>GCIT Ground Booking System</strong>
+    <span class="footer-accent"> — </span>
+    Gyalpozhing College of Information Technology &copy; 2025
+</footer>
+
+<script src="js/booking.js"></script>
+<script>
+function logout() {
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
+}
+function toggleNav() {
+    document.getElementById('mainNav').classList.toggle('open');
+}
+</script>
+</body>
+</html>

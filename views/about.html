@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Ground – GCIT Ground Booking</title>
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+<header>
+    <div class="nav-logo">
+        <img src="photos/logo.png" alt="GCIT Logo">
+        <div>
+            <div class="nav-logo-text">GCIT Ground Booking</div>
+            <div class="nav-logo-sub">Gyalpozhing College of IT</div>
+        </div>
+    </div>
+    <nav id="mainNav">
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="about.html" class="active-link">Available Ground</a></li>
+            <li><a href="booking.html">Booking</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+    <button class="hamburger" onclick="toggleNav()" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+<div class="page-hero">
+    <h1>Available Ground Slots</h1>
+    <p>Check real-time availability and book your preferred time slot</p>
+</div>
+
+<div class="section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div>
+            <div class="section-label">Football Ground</div>
+            <h2 class="section-title" style="margin-bottom:0;">Time Slot Availability</h2>
+        </div>
+        <button onclick="loadSlots()" style="background:var(--green-bg);border:1px solid var(--border);color:var(--green-mid);padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">↻ Refresh</button>
+    </div>
+
+    <div class="ground-grid" id="slotGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Loading slots...</div>
+    </div>
+
+    <div style="margin-top:32px;">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="slotTable">
+                    <tr><td colspan="5" style="text-align:center;padding:20px;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <strong>GCIT Ground Booking System</strong>
+    <span class="footer-accent"> — </span>
+    Gyalpozhing College of Information Technology &copy; 2025
+</footer>
+
+<script>
+function logout() {
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
+}
+
+function toggleNav() {
+    document.getElementById('mainNav').classList.toggle('open');
+}
+
+async function loadSlots() {
+    try {
+        const res = await fetch("/api/slots");
+        const data = await res.json();
+        const slots = Array.isArray(data) ? data : [];
+
+        renderSlotCards(slots);
+        renderSlotTable(slots);
+    } catch (err) {
+        document.getElementById("slotGrid").innerHTML =
+            `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Could not load slots. Make sure the server is running.</div>`;
+    }
+}
+
+function renderSlotCards(slots) {
+    const grid = document.getElementById("slotGrid");
+    if (!slots.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No slots available</div>`;
+        return;
+    }
+
+    grid.innerHTML = slots.map(slot => `
+        <div class="ground-card">
+            <div class="ground-card-header">
+                <span class="slot-time">${slot.start_time} – ${slot.end_time}</span>
+                <span class="status-badge ${slot.status === 'available' ? 'slot-avail status-approved' : 'slot-booked status-rejected'}">
+                    ${slot.status}
+                </span>
+            </div>
+            <div class="ground-card-body">
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Football Ground</p>
+                ${slot.status === 'available'
+                    ? `<a href="booking.html" class="btn-slot-book">Book This Slot</a>`
+                    : `<span style="font-size:13px;color:var(--text-muted);">Not available</span>`
+                }
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderSlotTable(slots) {
+    const tbody = document.getElementById("slotTable");
+    if (!slots.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;">No slots found</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = slots.map(slot => `
+        <tr>
+            <td>${slot.id}</td>
+            <td>${slot.start_time}</td>
+            <td>${slot.end_time}</td>
+            <td><span class="status-badge ${slot.status === 'available' ? 'status-approved' : 'status-rejected'}">${slot.status}</span></td>
+            <td>${slot.status === 'available'
+                ? `<a href="booking.html" class="btn-slot-book" style="font-size:12px;padding:6px 12px;">Book</a>`
+                : '<span style="color:var(--text-muted);font-size:13px;">N/A</span>'
+            }</td>
+        </tr>
+    `).join('');
+}
+
+loadSlots();
+</script>
+</body>
+</html>

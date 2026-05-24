@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login – GCIT Ground Booking</title>
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body class="auth-page">
+
+<div class="auth-box">
+    <div class="auth-logo">
+        <img src="photos/logo.png" alt="GCIT Logo">
+    </div>
+
+    <div style="text-align:center;">
+        <span class="admin-badge">Admin Portal</span>
+    </div>
+
+    <h2>Admin Sign In</h2>
+    <p class="subtitle">Restricted access – authorized personnel only</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="form-group">
+        <label for="email">Admin Email</label>
+        <input type="email" id="email" placeholder="admin@gcit.edu.bt" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-auth" onclick="adminLogin()">Sign In as Admin</button>
+
+    <div class="auth-footer">
+        <p><a href="index.html">← Back to user login</a></p>
+    </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

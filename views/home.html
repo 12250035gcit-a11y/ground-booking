@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCIT Ground Booking System</title>
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+<header>
+    <div class="nav-logo">
+        <img src="photos/logo.png" alt="GCIT Logo">
+        <div>
+            <div class="nav-logo-text">GCIT Ground Booking</div>
+            <div class="nav-logo-sub">Gyalpozhing College of IT</div>
+        </div>
+    </div>
+
+    <nav id="mainNav">
+        <ul>
+            <li><a href="home.html" class="active-link">Home</a></li>
+            <li><a href="about.html">Available Ground</a></li>
+            <li><a href="booking.html">Booking</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+
+    <button class="btn-logout" onclick="logout()">Logout</button>
+    <button class="hamburger" onclick="toggleNav()" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+    </button>
+</header>
+
+<section class="hero">
+    <img src="photos/homepage.jpeg" alt="College Ground">
+    <div class="hero-overlay">
+        <span class="hero-badge">GCIT — Gyalpozhing</span>
+        <h1>Smart Ground Booking for Campus Life</h1>
+        <p>Reserve your time slot, check availability, and manage campus ground usage — all in one place.</p>
+    </div>
+</section>
+
+<div class="accent-strip"></div>
+
+<div class="section">
+    <div class="about-grid">
+        <div class="about-logo">
+            <img src="photos/logo.png" alt="GCIT Logo">
+            <div class="college-name">Gyalpozhing College of<br>Information Technology</div>
+        </div>
+        <div class="about-text">
+            <div class="section-label">About the System</div>
+            <h2 class="section-title">A Better Way to Manage Campus Grounds</h2>
+            <p>The Ground Booking System of Gyalpozhing College of Information Technology is designed to assist both faculty members and students in efficiently managing and scheduling their time for using the college grounds.</p>
+            <p>By organizing bookings in a clear and systematic way, the system ensures fair allocation of time among all users. It helps prevent overuse or misuse of facilities by allowing equal opportunities for everyone to access the grounds.</p>
+            <p>Overall, the ground booking system enhances convenience, promotes better time management, and supports a more organized and fair use of campus resources.</p>
+        </div>
+    </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+    <div class="mv-grid">
+        <div class="mv-card vision">
+            <div class="section-label">Our Vision</div>
+            <h2 class="section-title">What We Aspire To</h2>
+            <p>"To create a smart and efficient digital platform for Gyalpozhing College of Information Technology that ensures fair, transparent, and easy access to ground facilities for all students and faculty."</p>
+        </div>
+        <div class="mv-card">
+            <div class="section-label">Our Mission</div>
+            <h2 class="section-title">How We Get There</h2>
+            <ul class="mission-list">
+                <li>Provide a simple and user-friendly system for booking the college ground anytime and from anywhere.</li>
+                <li>Ensure fair time allocation among students and faculty members.</li>
+                <li>Reduce conflicts and manual errors in scheduling ground usage.</li>
+                <li>Improve organization and management of ground activities.</li>
+                <li>Support a more active and well-coordinated campus environment.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<hr class="divider">
+
+<div class="dev-section">
+    <div class="section">
+        <div class="section-label">Meet the Team</div>
+        <h2 class="section-title">The Developers</h2>
+        <div class="dev-grid">
+            <div class="dev-card">
+                <img class="dev-photo" src="photos/nekhil.png" alt="Nekhil Limubu">
+                <div class="dev-role">Front-end Developer</div>
+                <div class="dev-name">Nekhil Limubu</div>
+            </div>
+            <div class="dev-card">
+                <img class="dev-photo" src="photos/logo.png" alt="Kuenzang Wangdi">
+                <div class="dev-role">Front-end Developer</div>
+                <div class="dev-name">Kuenzang Wangdi</div>
+            </div>
+            <div class="dev-card">
+                <img class="dev-photo" src="photos/pema.jpeg" alt="Pema">
+                <div class="dev-role">Back-end &amp; API</div>
+                <div class="dev-name">Pema</div>
+            </div>
+            <div class="dev-card">
+                <img class="dev-photo" src="photos/kinleyt.jpg" alt="Kinley Tshering Jamtsho">
+                <div class="dev-role">Back-end &amp; API</div>
+                <div class="dev-name">Kinley Tshering Jamtsho</div>
+            </div>
+            <div class="dev-card">
+                <img class="dev-photo" src="photos/pempo.jpeg" alt="Pem Tshering">
+                <div class="dev-role">Database Designer</div>
+                <div class="dev-name">Pem Tshering</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <strong>GCIT Ground Booking System</strong>
+    <span class="footer-accent"> — </span>
+    Gyalpozhing College of Information Technology &copy; 2025
+</footer>
+
+<script>
+function logout() {
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
+}
+function toggleNav() {
+    document.getElementById('mainNav').classList.toggle('open');
+}
+</script>
+</body>
+</html>
