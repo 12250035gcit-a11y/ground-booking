@@ -726,30 +726,22 @@ tbody tr:hover td { background: var(--green-bg); }
     box-shadow: var(--shadow);
 }
 
-.profile-image-wrapper { position: relative; flex-shrink: 0; }
-
-.profile-page-photo {
+.profile-avatar {
     width: 88px;
     height: 88px;
     border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--green-light);
-    display: block;
-}
-
-.edit-photo-btn {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    background: var(--green-mid);
+    background: linear-gradient(135deg, var(--green-mid), var(--green-light));
     color: white;
-    border: none;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: inherit;
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 3px solid var(--green-light);
+    letter-spacing: 1px;
+    box-shadow: 0 2px 12px rgba(45,106,79,0.2);
 }
 
 .profile-intro h1 {

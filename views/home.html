@@ -127,7 +127,9 @@
 <script>
 function logout() {
     localStorage.removeItem("user");
-    window.location.href = "index.html";
+    fetch("/user/logout", { method: "POST" }).finally(() => {
+        window.location.href = "index.html";
+    });
 }
 function toggleNav() {
     document.getElementById('mainNav').classList.toggle('open');

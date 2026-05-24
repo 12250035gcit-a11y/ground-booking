@@ -30,7 +30,9 @@ function login() {
 
 function logout() {
     localStorage.removeItem("user");
-    window.location.href = "index.html";
+    fetch("/user/logout", { method: "POST" }).finally(() => {
+        window.location.href = "index.html";
+    });
 }
 
 function showError(msg) {
