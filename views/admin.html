@@ -42,7 +42,7 @@
         </ul>
     </nav>
 
-    <button class="btn-logout" onclick="adminLogout()">Logout</button>
+    <button class="btn-logout" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     <button class="hamburger" onclick="toggleNav()" aria-label="Toggle navigation">
         <span></span><span></span><span></span>
     </button>
@@ -60,14 +60,6 @@
         <div class="stat-card">
             <div class="num" id="statTotal">–</div>
             <div class="lbl">Total Users</div>
-        </div>
-        <div class="stat-card">
-            <div class="num" id="statPending">–</div>
-            <div class="lbl">Pending Users</div>
-        </div>
-        <div class="stat-card">
-            <div class="num" id="statApproved">–</div>
-            <div class="lbl">Approved Users</div>
         </div>
         <div class="stat-card">
             <div class="num" id="statBookings">–</div>
@@ -95,11 +87,11 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Student ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="usersList">
@@ -187,8 +179,6 @@ async function loadUsersWithStats() {
         const list = Array.isArray(users) ? users : [];
         renderUsers(list);
         document.getElementById("statTotal").textContent = list.length;
-        document.getElementById("statPending").textContent = list.filter(u => u.status === "pending").length;
-        document.getElementById("statApproved").textContent = list.filter(u => u.status === "approved").length;
     } catch(e) { console.error(e); }
 }
 
@@ -216,9 +206,9 @@ async function loadAllBookingsWithStats() {
 
 function statusBadge(status) {
     const map = {
-        pending:  { cls: "badge-pending",  label: "⏳ Pending" },
-        approved: { cls: "badge-approved", label: "✅ Approved" },
-        rejected: { cls: "badge-rejected", label: "❌ Rejected" },
+        pending:  { cls: "badge-pending",  label: '<i class="fas fa-clock"></i> Pending' },
+        approved: { cls: "badge-approved", label: '<i class="fas fa-check-circle"></i> Approved' },
+        rejected: { cls: "badge-rejected", label: '<i class="fas fa-times-circle"></i> Rejected' },
     };
     const s = map[status] || { cls: "badge-pending", label: status };
     return `<span class="status-badge ${s.cls}">${s.label}</span>`;
@@ -230,7 +220,7 @@ function renderPendingBookings(bookings) {
     tbody.innerHTML = "";
 
     if (!bookings.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);">✅ No pending bookings — all caught up!</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--green-light);margin-right:6px;"></i>No pending bookings — all caught up!</td></tr>`;
         return;
     }
 

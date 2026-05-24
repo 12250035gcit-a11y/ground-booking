@@ -64,44 +64,30 @@ function renderUsers(users) {
     }
 
     users.forEach(u => {
-        const statusClass = u.status === "approved" ? "status-approved"
-            : u.status === "rejected" ? "status-rejected"
-            : "status-pending";
-
-        const actions = u.status === "pending" ? `
-            <button class="btn-approve" onclick="approveUser(${u.id})">Approve</button>
-            <button class="btn-reject" onclick="rejectUser(${u.id})">Reject</button>
-        ` : `<span class="action-done">${u.status}</span>`;
-
         const row = document.createElement("tr");
+        row.id = `user-row-${u.id}`;
         row.innerHTML = `
             <td>${u.id}</td>
+            <td style="font-size:11px;color:var(--text-muted);font-family:monospace;">${u.student_id || "–"}</td>
             <td>${u.first_name} ${u.last_name}</td>
             <td>${u.email}</td>
-            <td>${u.phone || "-"}</td>
-            <td><span class="status-badge ${statusClass}">${u.status}</span></td>
-            <td class="action-cell">${actions}</td>
+            <td>${u.phone || "–"}</td>
+            <td class="action-cell">
+                <button class="btn-reject" onclick="deleteUser(${u.id})">Delete</button>
+            </td>
         `;
         tbody.appendChild(row);
     });
 }
 
-async function approveUser(id) {
+async function deleteUser(id) {
+    if (!confirm("Delete this user? This cannot be undone.")) return;
     try {
-        const res = await fetch(`/admin/users/${id}/approve`, { method: "PUT" });
-        if (res.ok) loadUsers();
+        const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
+        if (res.ok) loadUsersWithStats();
+        else alert("Failed to delete user");
     } catch {
-        alert("Failed to approve user");
-    }
-}
-
-async function rejectUser(id) {
-    if (!confirm("Reject this user?")) return;
-    try {
-        const res = await fetch(`/admin/users/${id}/reject`, { method: "PUT" });
-        if (res.ok) loadUsers();
-    } catch {
-        alert("Failed to reject user");
+        alert("Server error");
     }
 }
 

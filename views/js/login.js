@@ -15,12 +15,12 @@ function login() {
         headers: { "Content-Type": "application/json" }
     })
     .then(res => res.json().then(result => ({ ok: res.ok, status: res.status, result })))
-    .then(({ ok, status, result }) => {
+    .then(({ ok, result }) => {
         if (ok && result.message === "login success") {
-            localStorage.setItem("user", JSON.stringify(result.user));
+            const user = result.user;
+            delete user.password;
+            localStorage.setItem("user", JSON.stringify(user));
             window.location.href = "home.html";
-        } else if (status === 403) {
-            showError("Your account is pending admin approval. Please wait.");
         } else {
             showError("Invalid email or password");
         }

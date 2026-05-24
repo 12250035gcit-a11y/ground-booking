@@ -20,8 +20,7 @@ func Router() {
 
 	// Admin user management
 	router.HandleFunc("/admin/users", controller.GetAllUsers).Methods("GET")
-	router.HandleFunc("/admin/users/{id}/approve", controller.ApproveUser).Methods("PUT")
-	router.HandleFunc("/admin/users/{id}/reject", controller.RejectUser).Methods("PUT")
+	router.HandleFunc("/admin/users/{id}", controller.DeleteUser).Methods("DELETE")
 
 	// Profile details
 	router.HandleFunc("/add/details", controller.AddDetails).Methods("POST")

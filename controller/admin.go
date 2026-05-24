@@ -41,34 +41,21 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	httpReps.ResponseWithsJSON(w, http.StatusOK, users)
 }
 
-func ApproveUser(w http.ResponseWriter, r *http.Request) {
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
 	if err != nil {
 		httpReps.ResponseWithError(w, http.StatusBadRequest, "invalid id")
 		return
 	}
 
-	err = model.UpdateUserStatus(id, "approved")
-	if err != nil {
+	if err := model.DeleteUser(id); err != nil {
+		if err == model.ErrNotFound {
+			httpReps.ResponseWithError(w, http.StatusNotFound, "user not found")
+			return
+		}
 		httpReps.ResponseWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	httpReps.ResponseWithsJSON(w, http.StatusOK, map[string]string{"message": "user approved"})
-}
-
-func RejectUser(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
-		httpReps.ResponseWithError(w, http.StatusBadRequest, "invalid id")
-		return
-	}
-
-	err = model.UpdateUserStatus(id, "rejected")
-	if err != nil {
-		httpReps.ResponseWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	httpReps.ResponseWithsJSON(w, http.StatusOK, map[string]string{"message": "user rejected"})
+	httpReps.ResponseWithsJSON(w, http.StatusOK, map[string]string{"message": "user deleted"})
 }

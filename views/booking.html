@@ -174,7 +174,7 @@
             <li><a href="profile.html">Profile</a></li>
         </ul>
     </nav>
-    <button class="btn-logout" onclick="logout()">Logout</button>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     <button class="hamburger" onclick="toggleNav()" aria-label="Toggle navigation">
         <span></span><span></span><span></span>
     </button>
@@ -193,7 +193,7 @@
         <!-- Timeline of booked slots -->
         <div class="timeline-section">
             <div class="timeline-header">
-                <span class="timeline-title">📅 Ground Availability</span>
+                <span class="timeline-title"><i class="fas fa-calendar-alt"></i> Ground Availability</span>
                 <div class="timeline-date-pick">
                     <label for="timelineDate" style="font-size:12px;font-weight:700;color:var(--text-muted);">DATE</label>
                     <input type="date" id="timelineDate" onchange="loadTimeline()">
@@ -245,12 +245,12 @@
         <h3 class="panel-title">New Booking Request</h3>
 
         <div style="background:#fff3cd;border:1px solid #ffd966;border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#7d5a00;font-weight:500;margin-bottom:16px;">
-            ⏳ Bookings require admin approval before being confirmed.
+            <i class="fas fa-hourglass-half"></i> Bookings require admin approval before being confirmed.
         </div>
 
         <div class="form-group">
             <label for="studentId">Student ID</label>
-            <input id="studentId" placeholder="e.g. GCIT2024001">
+            <input id="studentId" readonly style="background:var(--green-bg);cursor:default;">
         </div>
 
         <div class="form-group">
