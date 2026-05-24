@@ -125,6 +125,18 @@ if (user.first_name) {
     document.getElementById("userStudentId").textContent = "ID: " + (user.student_id || "—");
 }
 
+// Pre-fill profile form from logged-in user
+if (user.email) {
+    const emailEl = document.getElementById("email");
+    emailEl.value = user.email;
+    emailEl.readOnly = true;
+    emailEl.style.background = "var(--green-bg)";
+    emailEl.style.cursor = "default";
+}
+if (user.phone) {
+    document.getElementById("phone").value = user.phone;
+}
+
 // Load bookings for history
 async function loadHistory() {
     try {
