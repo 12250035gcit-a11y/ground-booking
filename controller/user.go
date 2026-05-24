@@ -56,6 +56,20 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func GetMe(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session")
+	if err != nil || cookie.Value == "" {
+		httpReps.ResponseWithError(w, http.StatusUnauthorized, "not authenticated")
+		return
+	}
+	user, err := model.GetUserByEmail(cookie.Value)
+	if err != nil {
+		httpReps.ResponseWithError(w, http.StatusUnauthorized, "session invalid")
+		return
+	}
+	httpReps.ResponseWithsJSON(w, http.StatusOK, user)
+}
+
 func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session",

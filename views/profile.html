@@ -114,6 +114,7 @@
     <a href="profile.html" class="dock-item active"><i class="fas fa-user"></i><span>Profile</span></a>
 </nav>
 
+<script src="js/auth.js"></script>
 <script>
 function logout() {
     localStorage.removeItem("user");
@@ -126,27 +127,23 @@ function toggleNav() {
     document.getElementById('mainNav').classList.toggle('open');
 }
 
-// Load user info from localStorage
-const user = JSON.parse(localStorage.getItem("user") || "{}");
-if (user.first_name) {
+function populateProfile(user) {
+    if (!user || !user.first_name) return;
     const fullName = user.first_name + " " + (user.last_name || "");
     document.getElementById("userName").textContent = fullName.trim();
     document.getElementById("userEmail").textContent = user.email || "—";
     const initials = (user.first_name[0] || "").toUpperCase() + (user.last_name ? user.last_name[0].toUpperCase() : "");
     document.getElementById("profileAvatar").textContent = initials || "?";
-}
 
-// Pre-fill profile form from logged-in user
-if (user.email) {
     const emailEl = document.getElementById("email");
-    emailEl.value = user.email;
+    emailEl.value = user.email || "";
     emailEl.readOnly = true;
     emailEl.style.background = "var(--green-bg)";
     emailEl.style.cursor = "default";
+    if (user.phone) document.getElementById("phone").value = user.phone;
 }
-if (user.phone) {
-    document.getElementById("phone").value = user.phone;
-}
+
+requireAuth(populateProfile);
 
 // Load bookings for history
 async function loadHistory() {
