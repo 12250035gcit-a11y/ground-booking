@@ -15,6 +15,7 @@ func Router() {
 	// User auth
 	router.HandleFunc("/user/add", controller.Adduser).Methods("POST")
 	router.HandleFunc("/user/login", controller.LoginUser).Methods("POST")
+	router.HandleFunc("/user/logout", controller.LogoutUser).Methods("POST")
 
 	// Admin auth
 	router.HandleFunc("/admin/login", controller.AdminLogin).Methods("POST")

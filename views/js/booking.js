@@ -13,9 +13,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupDate();
     buildTimelineHours();
+    prefillFromURL();
     loadTimeline();
     loadBookings();
 });
+
+function prefillFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const start  = params.get("start");
+    const end    = params.get("end");
+    const date   = params.get("date");
+
+    if (date) {
+        const dateEl = document.getElementById("bookDate");
+        const tlDate = document.getElementById("timelineDate");
+        if (dateEl) dateEl.value = date;
+        if (tlDate) tlDate.value = date;
+    }
+    if (start) {
+        const sel = document.getElementById("startTime");
+        if (sel) sel.value = start;
+    }
+    if (end) {
+        const sel = document.getElementById("endTime");
+        if (sel) sel.value = end;
+    }
+}
 
 function setupDate() {
     const today = new Date().toISOString().split("T")[0];

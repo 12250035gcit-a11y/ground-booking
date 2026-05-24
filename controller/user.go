@@ -41,8 +41,29 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session",
+		Value:    user.Email,
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	httpReps.ResponseWithsJSON(w, http.StatusOK, map[string]interface{}{
 		"message": "login success",
 		"user":    user,
 	})
+}
+
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	httpReps.ResponseWithsJSON(w, http.StatusOK, map[string]string{"message": "logged out"})
 }

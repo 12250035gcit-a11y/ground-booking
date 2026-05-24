@@ -33,15 +33,11 @@
 <div class="profile-container">
 
     <div class="profile-header">
-        <div class="profile-image-wrapper">
-            <img src="photos/kinleyt.jpg" alt="User Photo" class="profile-page-photo">
-            <button class="edit-photo-btn">Edit</button>
-        </div>
+        <div class="profile-avatar" id="profileAvatar">?</div>
         <div class="profile-intro">
             <div class="section-label">Welcome back,</div>
             <h1 class="section-title" id="userName">—</h1>
             <p class="profile-tag" id="userEmail">—</p>
-            <p style="margin-top:6px;font-size:12px;color:var(--text-muted);font-family:monospace;" id="userStudentId">—</p>
         </div>
     </div>
 
@@ -110,7 +106,9 @@
 <script>
 function logout() {
     localStorage.removeItem("user");
-    window.location.href = "index.html";
+    fetch("/user/logout", { method: "POST" }).finally(() => {
+        window.location.href = "index.html";
+    });
 }
 
 function toggleNav() {
@@ -120,9 +118,11 @@ function toggleNav() {
 // Load user info from localStorage
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 if (user.first_name) {
-    document.getElementById("userName").textContent = user.first_name + " " + (user.last_name || "");
+    const fullName = user.first_name + " " + (user.last_name || "");
+    document.getElementById("userName").textContent = fullName.trim();
     document.getElementById("userEmail").textContent = user.email || "—";
-    document.getElementById("userStudentId").textContent = "ID: " + (user.student_id || "—");
+    const initials = (user.first_name[0] || "").toUpperCase() + (user.last_name ? user.last_name[0].toUpperCase() : "");
+    document.getElementById("profileAvatar").textContent = initials || "?";
 }
 
 // Pre-fill profile form from logged-in user
