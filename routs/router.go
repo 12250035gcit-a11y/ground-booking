@@ -4,6 +4,7 @@ import (
 	"log"
 	"myapp/controller"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -43,6 +44,10 @@ func Router() {
 	fs := http.FileServer(http.Dir("./views"))
 	router.PathPrefix("/").Handler(fs)
 
-	log.Println("Listening on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("Listening on port", port)
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
