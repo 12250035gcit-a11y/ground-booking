@@ -867,12 +867,12 @@ tbody tr:hover td { background: var(--green-bg); }
 .auth-page {
     min-height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     background: linear-gradient(140deg, var(--green-dark) 0%, var(--green-mid) 100%);
-    padding: 24px 16px;
+    padding: 32px 16px;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .auth-page::before {
