@@ -154,6 +154,34 @@
         .badge-pending  { background: #fff3cd; color: #7d5a00; }
         .badge-approved { background: #d8f3dc; color: #1a3a2a; }
         .badge-rejected { background: #fde8e8; color: #8b1a1a; }
+
+        /* ---- Mobile fixes ---- */
+        @media (max-width: 768px) {
+            /* Stack time selects vertically from 768px, not just 540px */
+            .time-row { grid-template-columns: 1fr; gap: 8px; }
+
+            /* Tighter panel padding */
+            .booking-panel { padding: 18px 14px; }
+
+            /* Compact timeline on small screens */
+            .timeline-section { padding: 14px; }
+            .timeline-hour-label { font-size: 8px; }
+
+            /* Hide email column on mobile — too long */
+            .booking-table-email { display: none; }
+
+            /* Full-width form inputs ensure no overflow */
+            .form-group input,
+            .form-group select,
+            .form-group textarea { font-size: 16px; } /* prevents iOS zoom */
+        }
+
+        @media (max-width: 480px) {
+            .booking-panel { padding: 16px 12px; }
+            .panel-title { font-size: 1.1rem; margin-bottom: 14px; padding-bottom: 10px; }
+            .timeline-section { padding: 12px; border-radius: var(--radius-sm); }
+            .timeline-bar { height: 44px; }
+        }
     </style>
 </head>
 <body>
@@ -224,7 +252,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Email</th>
+                            <th class="booking-table-email">Email</th>
                             <th>Type</th>
                             <th>Date</th>
                             <th>Time</th>
@@ -302,8 +330,10 @@
     <a href="profile.html" class="dock-item"><i class="fas fa-user"></i><span>Profile</span></a>
 </nav>
 
+<script src="js/auth.js"></script>
 <script src="js/booking.js"></script>
 <script>
+requireAuth();
 // Populate start/end time dropdowns with 30-min increments 06:00–22:00
 (function buildTimeSelects() {
     const start = document.getElementById("startTime");

@@ -131,7 +131,10 @@
     <a href="profile.html" class="dock-item"><i class="fas fa-user"></i><span>Profile</span></a>
 </nav>
 
+<script src="js/auth.js"></script>
 <script>
+requireAuth();
+
 function logout() {
     localStorage.removeItem("user");
     fetch("/user/logout", { method: "POST" }).finally(() => {

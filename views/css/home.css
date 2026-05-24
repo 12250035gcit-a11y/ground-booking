@@ -453,7 +453,7 @@ footer {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 480px;
+    min-width: 320px;
 }
 
 th {
@@ -600,9 +600,11 @@ tbody tr:hover td { background: var(--green-bg); }
     grid-template-columns: 1fr 356px;
     gap: 28px;
     max-width: 1100px;
+    width: 100%;
     margin: 36px auto;
     padding: 0 24px;
     align-items: start;
+    box-sizing: border-box;
 }
 
 .booking-panel {
@@ -1232,8 +1234,13 @@ tbody tr:hover td { background: var(--green-bg); }
 
     /* ── Spacing ── */
     .section { padding: 36px 16px; }
-    .booking-layout { padding: 0 16px; }
+    .booking-layout { padding: 0 16px; gap: 16px; }
     .profile-container { padding: 24px 16px 48px; }
+
+    /* ── Prevent iOS zoom on inputs ── */
+    .form-group input,
+    .form-group select,
+    .form-group textarea { font-size: 16px; }
 
     /* ── Dev grid ── */
     .dev-card { width: calc(50% - 8px); }
@@ -1243,8 +1250,9 @@ tbody tr:hover td { background: var(--green-bg); }
     .timeline-date-pick { width: 100%; }
     .timeline-date-pick input[type="date"] { flex: 1; }
 
-    /* ── Booking table columns ── */
-    .table-wrap table { min-width: 360px; }
+    /* ── Booking table — narrower on mobile ── */
+    .table-wrap table { min-width: 300px; }
+    table { min-width: 300px; }
 }
 
 @media (max-width: 540px) {

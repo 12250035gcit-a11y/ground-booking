@@ -171,7 +171,7 @@ function renderBookings(bookings) {
     bookings.forEach(b => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${b.student_id || "–"}</td>
+            <td class="booking-table-email">${b.student_id || "–"}</td>
             <td>${b.match_type || "–"}</td>
             <td>${b.date || "–"}</td>
             <td>${b.starting_time || "–"} – ${b.ending_time || "–"}</td>

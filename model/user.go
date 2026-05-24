@@ -14,7 +14,7 @@ type User struct {
 	LastName  string `json:"last_name"`
 	Phone     string `json:"phone"`
 	Email     string `json:"email"`
-	Password  string `json:"password"`
+	Password  string `json:"password,omitempty"`
 }
 
 func generateUUID() string {
@@ -62,6 +62,18 @@ func (u *User) Login() error {
 
 	*u = dbUser
 	return nil
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	var u User
+	err := postgres.Db.QueryRow(queryGetUser, email).Scan(
+		&u.ID, &u.StudentID, &u.FirstName, &u.LastName, &u.Phone, &u.Email, &u.Password,
+	)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	u.Password = ""
+	return &u, nil
 }
 
 func GetAllUsers() ([]User, error) {
