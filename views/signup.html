@@ -86,10 +86,15 @@ function signup() {
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" }
     })
-    .then(res => res.json())
-    .then(result => {
-        if (result.error) {
-            errorEl.textContent = "Email already registered. Please login instead.";
+    .then(res => res.json().then(result => ({ ok: res.ok, result })))
+    .then(({ ok, result }) => {
+        if (!ok) {
+            const msg = result.error || "";
+            if (msg.toLowerCase().includes("unique") || msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("already exists")) {
+                errorEl.textContent = "Email already registered. Please login instead.";
+            } else {
+                errorEl.textContent = msg || "Registration failed. Please try again.";
+            }
             errorEl.style.display = "block";
             return;
         }
