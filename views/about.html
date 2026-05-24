@@ -41,7 +41,12 @@
             <div class="section-label">Football Ground</div>
             <h2 class="section-title" style="margin-bottom:0;">Time Slot Availability</h2>
         </div>
-        <button onclick="loadSlots()" style="background:var(--green-bg);border:1px solid var(--border);color:var(--green-mid);padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;">↻ Refresh</button>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <label for="availDate" style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Date</label>
+            <input type="date" id="availDate" onchange="loadSlots()"
+                style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-family:inherit;font-size:13px;background:var(--green-bg);color:var(--text);outline:none;">
+            <button onclick="loadSlots()" style="background:var(--green-bg);border:1px solid var(--border);color:var(--green-mid);padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
     </div>
 
     <div class="ground-grid" id="slotGrid">
@@ -53,7 +58,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Start Time</th>
                         <th>End Time</th>
                         <th>Status</th>
@@ -61,7 +65,7 @@
                     </tr>
                 </thead>
                 <tbody id="slotTable">
-                    <tr><td colspan="5" style="text-align:center;padding:20px;">Loading...</td></tr>
+                    <tr><td colspan="4" style="text-align:center;padding:20px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -84,24 +88,39 @@ function toggleNav() {
     document.getElementById('mainNav').classList.toggle('open');
 }
 
-async function loadSlots() {
-    try {
-        const res = await fetch("/api/slots");
-        const data = await res.json();
-        const slots = Array.isArray(data) ? data : [];
+// Returns true if a booking's time range overlaps with a slot's time range
+function overlaps(bookingStart, bookingEnd, slotStart, slotEnd) {
+    return bookingStart < slotEnd && bookingEnd > slotStart;
+}
 
-        renderSlotCards(slots);
-        renderSlotTable(slots);
+async function loadSlots() {
+    const date = document.getElementById("availDate").value;
+
+    try {
+        // Fetch slot definitions and today's approved bookings in parallel
+        const [slots, bookings] = await Promise.all([
+            fetch("/api/slots").then(r => r.json()).then(d => Array.isArray(d) ? d : []),
+            fetch(`/bookings/date/${date}`).then(r => r.json()).then(d => Array.isArray(d) ? d : [])
+        ]);
+
+        // A slot is booked if any approved booking's time range overlaps it
+        const enriched = slots.map(slot => ({
+            ...slot,
+            isAvailable: !bookings.some(b => overlaps(b.starting_time, b.ending_time, slot.start_time, slot.end_time))
+        }));
+
+        renderSlotCards(enriched);
+        renderSlotTable(enriched);
     } catch (err) {
         document.getElementById("slotGrid").innerHTML =
-            `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Could not load slots. Make sure the server is running.</div>`;
+            `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">Could not load availability. Make sure the server is running.</div>`;
     }
 }
 
 function renderSlotCards(slots) {
     const grid = document.getElementById("slotGrid");
     if (!slots.length) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No slots available</div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No slots configured.</div>`;
         return;
     }
 
@@ -109,15 +128,15 @@ function renderSlotCards(slots) {
         <div class="ground-card">
             <div class="ground-card-header">
                 <span class="slot-time">${slot.start_time} – ${slot.end_time}</span>
-                <span class="status-badge ${slot.status === 'available' ? 'slot-avail status-approved' : 'slot-booked status-rejected'}">
-                    ${slot.status}
+                <span class="status-badge ${slot.isAvailable ? 'slot-avail status-approved' : 'slot-booked status-rejected'}">
+                    ${slot.isAvailable ? 'Available' : 'Booked'}
                 </span>
             </div>
             <div class="ground-card-body">
                 <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Football Ground</p>
-                ${slot.status === 'available'
+                ${slot.isAvailable
                     ? `<a href="booking.html" class="btn-slot-book">Book This Slot</a>`
-                    : `<span style="font-size:13px;color:var(--text-muted);">Not available</span>`
+                    : `<span style="font-size:13px;color:var(--text-muted);"><i class="fas fa-lock"></i> Already booked</span>`
                 }
             </div>
         </div>
@@ -127,25 +146,30 @@ function renderSlotCards(slots) {
 function renderSlotTable(slots) {
     const tbody = document.getElementById("slotTable");
     if (!slots.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;">No slots found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;">No slots found</td></tr>`;
         return;
     }
 
     tbody.innerHTML = slots.map(slot => `
         <tr>
-            <td>${slot.id}</td>
             <td>${slot.start_time}</td>
             <td>${slot.end_time}</td>
-            <td><span class="status-badge ${slot.status === 'available' ? 'status-approved' : 'status-rejected'}">${slot.status}</span></td>
-            <td>${slot.status === 'available'
+            <td><span class="status-badge ${slot.isAvailable ? 'status-approved' : 'status-rejected'}">
+                ${slot.isAvailable ? 'Available' : 'Booked'}
+            </span></td>
+            <td>${slot.isAvailable
                 ? `<a href="booking.html" class="btn-slot-book" style="font-size:12px;padding:6px 12px;">Book</a>`
-                : '<span style="color:var(--text-muted);font-size:13px;">N/A</span>'
+                : `<span style="color:var(--text-muted);font-size:13px;">–</span>`
             }</td>
         </tr>
     `).join('');
 }
 
-loadSlots();
+// Initialise date picker to today then load
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("availDate").value = new Date().toISOString().split("T")[0];
+    loadSlots();
+});
 </script>
 </body>
 </html>
