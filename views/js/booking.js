@@ -160,7 +160,7 @@ function renderBookings(bookings) {
     if (!bookings || bookings.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">
+                <td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">
                     No bookings yet. Submit your first request!
                 </td>
             </tr>
@@ -171,10 +171,9 @@ function renderBookings(bookings) {
     bookings.forEach(b => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td class="booking-table-email">${b.student_id || "–"}</td>
             <td>${b.match_type || "–"}</td>
             <td>${b.date || "–"}</td>
-            <td>${b.starting_time || "–"} – ${b.ending_time || "–"}</td>
+            <td style="white-space:nowrap;">${b.starting_time || "–"} – ${b.ending_time || "–"}</td>
             <td>${statusBadge(b.status)}</td>
             <td>
                 ${b.status === "pending" || b.status === "rejected"

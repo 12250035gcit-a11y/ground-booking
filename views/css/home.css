@@ -593,29 +593,7 @@ tbody tr:hover td { background: var(--green-bg); }
     gap: 8px;
 }
 
-/* ─── BOOKING LAYOUT ─────────────────────────────── */
-
-.booking-layout {
-    display: grid;
-    grid-template-columns: 1fr 356px;
-    gap: 28px;
-    max-width: 1100px;
-    width: 100%;
-    margin: 36px auto;
-    padding: 0 24px;
-    align-items: start;
-    box-sizing: border-box;
-}
-
-.booking-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px;
-    position: sticky;
-    top: 80px;
-    box-shadow: var(--shadow-md);
-}
+/* ─── BOOKING LAYOUT (legacy — kept for .btn-book) ── */
 
 .panel-title {
     font-family: 'DM Serif Display', serif;
@@ -1163,14 +1141,6 @@ tbody tr:hover td { background: var(--green-bg); }
 
 /* Tablet and below */
 @media (max-width: 900px) {
-    .booking-layout {
-        grid-template-columns: 1fr;
-        margin: 24px auto;
-    }
-    .booking-panel {
-        position: static;
-        order: -1;
-    }
     .about-grid { grid-template-columns: 1fr; }
     .about-logo { display: none; }
 }
@@ -1245,13 +1215,7 @@ tbody tr:hover td { background: var(--green-bg); }
     /* ── Dev grid ── */
     .dev-card { width: calc(50% - 8px); }
 
-    /* ── Timeline ── */
-    .timeline-header { flex-direction: column; align-items: flex-start; }
-    .timeline-date-pick { width: 100%; }
-    .timeline-date-pick input[type="date"] { flex: 1; }
-
-    /* ── Booking table — narrower on mobile ── */
-    .table-wrap table { min-width: 300px; }
+    /* ── Tables ── */
     table { min-width: 300px; }
 }
 
@@ -1277,9 +1241,6 @@ tbody tr:hover td { background: var(--green-bg); }
     .dev-card { width: calc(50% - 6px); padding: 18px 12px; }
     .dev-photo { width: 60px; height: 60px; }
 
-    /* Booking */
-    .booking-layout { padding: 0 12px; margin: 16px auto; }
-    .booking-panel { padding: 20px 16px; }
 
     /* Hero */
     .hero-overlay h1 { font-size: 1.45rem; }
