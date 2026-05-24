@@ -270,8 +270,12 @@
         <div class="form-group">
             <label>Time Slot</label>
             <div class="time-row">
-                <input type="time" id="startTime" title="Start time">
-                <input type="time" id="endTime" title="End time">
+                <select id="startTime">
+                    <option value="">Start time</option>
+                </select>
+                <select id="endTime">
+                    <option value="">End time</option>
+                </select>
             </div>
         </div>
 
@@ -293,6 +297,32 @@
 
 <script src="js/booking.js"></script>
 <script>
+// Populate start/end time dropdowns with 30-min increments 06:00–22:00
+(function buildTimeSelects() {
+    const start = document.getElementById("startTime");
+    const end   = document.getElementById("endTime");
+    for (let h = 6; h <= 22; h++) {
+        for (let m = 0; m < 60; m += 30) {
+            if (h === 22 && m > 0) break;
+            const val   = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            const label = (() => {
+                const period = h < 12 ? 'AM' : 'PM';
+                const h12    = h % 12 || 12;
+                return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+            })();
+            // Start goes up to 21:30 (must leave room for at least 30 min)
+            if (h < 22 || (h === 22 && m === 0)) {
+                const opt = new Option(label, val);
+                if (h < 22) start.add(opt);
+            }
+            // End goes from 06:30 up to 22:00
+            if (h > 6 || (h === 6 && m > 0)) {
+                end.add(new Option(label, val));
+            }
+        }
+    }
+})();
+
 function logout() {
     localStorage.removeItem("user");
     window.location.href = "index.html";
