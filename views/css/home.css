@@ -1120,6 +1120,43 @@ tbody tr:hover td { background: var(--green-bg); }
 .tab-pane { display: none; }
 .tab-pane.active { display: block; }
 
+/* ─── BOTTOM DOCK (mobile nav) ────────────────────── */
+
+.bottom-dock {
+    display: none;
+}
+
+.dock-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 4px 6px;
+    transition: color var(--transition);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dock-item i {
+    font-size: 19px;
+    transition: transform 0.15s ease;
+}
+
+.dock-item.active {
+    color: var(--green-mid);
+}
+
+.dock-item.active i {
+    transform: translateY(-1px) scale(1.08);
+}
+
 /* ─── RESPONSIVE ─────────────────────────────────── */
 
 /* Tablet and below */
@@ -1130,50 +1167,41 @@ tbody tr:hover td { background: var(--green-bg); }
     }
     .booking-panel {
         position: static;
-        order: -1; /* form first on mobile */
+        order: -1;
     }
     .about-grid { grid-template-columns: 1fr; }
     .about-logo { display: none; }
 }
 
 @media (max-width: 768px) {
-    /* Header */
+    /* ── Header: logo only, no nav, no logout ── */
     header { padding: 0 16px; }
-    .hamburger { display: flex; }
     .nav-logo-sub { display: none; }
+    #mainNav { display: none !important; }
+    .btn-logout { display: none !important; }
+    .hamburger { display: none !important; }
 
-    /* Mobile nav */
-    nav {
-        position: absolute;
-        top: 64px;
+    /* ── Bottom dock visible ── */
+    .bottom-dock {
+        display: flex;
+        position: fixed;
+        bottom: 0;
         left: 0;
         right: 0;
+        height: 62px;
         background: var(--surface);
-        border-bottom: 1px solid var(--border);
-        box-shadow: 0 4px 16px rgba(26,58,42,0.1);
-        padding: 0;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.28s ease, padding 0.2s ease;
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -2px 20px rgba(26,58,42,0.10);
+        z-index: 2000;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    nav.open {
-        max-height: 320px;
-        padding: 8px 12px 14px;
+    /* Push page content above the dock */
+    body:not(.auth-page) {
+        padding-bottom: 68px;
     }
 
-    nav ul {
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    nav a {
-        display: block;
-        padding: 10px 14px;
-        font-size: 15px;
-    }
-
-    /* Layout */
+    /* ── Layout ── */
     .mv-grid { grid-template-columns: 1fr; }
     .profile-content-grid { grid-template-columns: 1fr; }
 
@@ -1181,6 +1209,7 @@ tbody tr:hover td { background: var(--green-bg); }
         flex-direction: column;
         text-align: center;
         padding: 24px 20px;
+        gap: 16px;
     }
 
     .profile-header .profile-intro h1 { font-size: 1.4rem; }
@@ -1190,24 +1219,32 @@ tbody tr:hover td { background: var(--green-bg); }
         gap: 4px;
     }
 
-    /* Hero */
+    /* ── Hero ── */
     .hero { height: 300px; }
     .hero-overlay { padding: 28px 24px; }
 
-    /* Admin */
+    /* ── Admin ── */
     .admin-stats { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
     .admin-layout { margin: 24px auto; }
 
-    /* Auth */
+    /* ── Auth ── */
     .auth-box { padding: 32px 24px; }
 
-    /* Section */
+    /* ── Spacing ── */
     .section { padding: 36px 16px; }
     .booking-layout { padding: 0 16px; }
     .profile-container { padding: 24px 16px 48px; }
 
-    /* Dev grid */
+    /* ── Dev grid ── */
     .dev-card { width: calc(50% - 8px); }
+
+    /* ── Timeline ── */
+    .timeline-header { flex-direction: column; align-items: flex-start; }
+    .timeline-date-pick { width: 100%; }
+    .timeline-date-pick input[type="date"] { flex: 1; }
+
+    /* ── Booking table columns ── */
+    .table-wrap table { min-width: 360px; }
 }
 
 @media (max-width: 540px) {
@@ -1234,7 +1271,7 @@ tbody tr:hover td { background: var(--green-bg); }
 
     /* Booking */
     .booking-layout { padding: 0 12px; margin: 16px auto; }
-    .booking-panel { padding: 20px 18px; }
+    .booking-panel { padding: 20px 16px; }
 
     /* Hero */
     .hero-overlay h1 { font-size: 1.45rem; }
@@ -1245,7 +1282,49 @@ tbody tr:hover td { background: var(--green-bg); }
     .admin-layout { padding: 0 12px 40px; }
     .profile-container { padding: 16px 12px 40px; }
 
-    /* Stat numbers smaller */
+    /* Stat numbers */
     .stat-card .num { font-size: 1.8rem; }
     .stat-number { font-size: 1.8rem; }
+
+    /* Booking page hero */
+    .page-hero { padding: 36px 16px 32px; }
+    .page-hero h1 { font-size: 1.5rem; }
+    .page-hero p { font-size: 13px; }
+
+    /* Profile header */
+    .profile-header { padding: 20px 16px; }
+
+    /* Slot cards full width */
+    .ground-card { border-radius: var(--radius-sm); }
+}
+
+/* Logout button inside profile — mobile-only visibility */
+.mobile-logout-btn {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        background: var(--red-bg);
+        color: #8b1a1a;
+        border: 1px solid var(--red-border);
+        border-radius: var(--radius-sm);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background var(--transition), color var(--transition);
+    }
+    .mobile-logout-btn:hover {
+        background: var(--red);
+        color: white;
+        border-color: var(--red);
+    }
 }
