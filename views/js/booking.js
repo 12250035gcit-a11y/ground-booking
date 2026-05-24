@@ -6,6 +6,10 @@ const TIMELINE_END   = 22;  // 10pm
 const TIMELINE_HOURS = TIMELINE_END - TIMELINE_START;
 
 document.addEventListener("DOMContentLoaded", () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const sid = document.getElementById("studentId");
+    if (sid && user.student_id) sid.value = user.student_id;
+
     setupDate();
     buildTimelineHours();
     loadTimeline();

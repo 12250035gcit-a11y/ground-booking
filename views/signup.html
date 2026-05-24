@@ -14,7 +14,7 @@
     </div>
 
     <h2>Create Account</h2>
-    <p class="subtitle">Your account will be reviewed by an admin before activation</p>
+    <p class="subtitle">Create your GCIT account to start booking</p>
 
     <div class="error-msg" id="errorMsg"></div>
 
@@ -93,7 +93,7 @@ function signup() {
             errorEl.style.display = "block";
             return;
         }
-        alert("Account created! Please wait for admin approval before signing in.");
+        alert("Account created! You can now sign in.");
         window.location.href = "index.html";
     })
     .catch(() => {

@@ -62,14 +62,6 @@
             <div class="lbl">Total Users</div>
         </div>
         <div class="stat-card">
-            <div class="num" id="statPending">–</div>
-            <div class="lbl">Pending Users</div>
-        </div>
-        <div class="stat-card">
-            <div class="num" id="statApproved">–</div>
-            <div class="lbl">Approved Users</div>
-        </div>
-        <div class="stat-card">
             <div class="num" id="statBookings">–</div>
             <div class="lbl">Total Bookings</div>
         </div>
@@ -95,11 +87,11 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Student ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="usersList">
@@ -187,8 +179,6 @@ async function loadUsersWithStats() {
         const list = Array.isArray(users) ? users : [];
         renderUsers(list);
         document.getElementById("statTotal").textContent = list.length;
-        document.getElementById("statPending").textContent = list.filter(u => u.status === "pending").length;
-        document.getElementById("statApproved").textContent = list.filter(u => u.status === "approved").length;
     } catch(e) { console.error(e); }
 }
 

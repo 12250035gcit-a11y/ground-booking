@@ -1,30 +1,41 @@
 package model
 
 import (
+	"crypto/rand"
 	"errors"
+	"fmt"
 	"myapp/datastore/postgres"
 )
 
 type User struct {
 	ID        int    `json:"id"`
+	StudentID string `json:"student_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Phone     string `json:"phone"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
-	Status    string `json:"status"`
 }
 
-const queryAdduser = `INSERT INTO users(first_name, last_name, phone, email, password, status)
-VALUES($1, $2, $3, $4, $5, 'pending');`
+func generateUUID() string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	b[6] = (b[6] & 0x0f) | 0x40
+	b[8] = (b[8] & 0x3f) | 0x80
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+}
+
+const queryAdduser = `INSERT INTO users(student_id, first_name, last_name, phone, email, password)
+VALUES($1, $2, $3, $4, $5, $6);`
 
 func (u *User) Signup() error {
-	_, err := postgres.Db.Exec(queryAdduser, u.FirstName, u.LastName, u.Phone, u.Email, u.Password)
+	u.StudentID = generateUUID()
+	_, err := postgres.Db.Exec(queryAdduser, u.StudentID, u.FirstName, u.LastName, u.Phone, u.Email, u.Password)
 	return err
 }
 
 const queryGetUser = `
-SELECT id, first_name, last_name, phone, email, password, status
+SELECT id, student_id, first_name, last_name, phone, email, password
 FROM users
 WHERE email=$1;
 `
@@ -34,14 +45,13 @@ func (u *User) Login() error {
 
 	err := postgres.Db.QueryRow(queryGetUser, u.Email).Scan(
 		&dbUser.ID,
+		&dbUser.StudentID,
 		&dbUser.FirstName,
 		&dbUser.LastName,
 		&dbUser.Phone,
 		&dbUser.Email,
 		&dbUser.Password,
-		&dbUser.Status,
 	)
-
 	if err != nil {
 		return errors.New("user not found")
 	}
@@ -50,18 +60,13 @@ func (u *User) Login() error {
 		return errors.New("invalid password")
 	}
 
-	if dbUser.Status != "approved" {
-		return errors.New("account pending approval")
-	}
-
 	*u = dbUser
 	return nil
 }
 
-// GetAllUsers - admin only
 func GetAllUsers() ([]User, error) {
 	rows, err := postgres.Db.Query(`
-		SELECT id, first_name, last_name, phone, email, status
+		SELECT id, student_id, first_name, last_name, phone, email
 		FROM users ORDER BY id DESC
 	`)
 	if err != nil {
@@ -72,8 +77,7 @@ func GetAllUsers() ([]User, error) {
 	var users []User
 	for rows.Next() {
 		var u User
-		err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Phone, &u.Email, &u.Status)
-		if err != nil {
+		if err := rows.Scan(&u.ID, &u.StudentID, &u.FirstName, &u.LastName, &u.Phone, &u.Email); err != nil {
 			return nil, err
 		}
 		users = append(users, u)
@@ -81,9 +85,8 @@ func GetAllUsers() ([]User, error) {
 	return users, nil
 }
 
-// UpdateUserStatus - admin only
-func UpdateUserStatus(id int, status string) error {
-	res, err := postgres.Db.Exec(`UPDATE users SET status=$1 WHERE id=$2`, status, id)
+func DeleteUser(id int) error {
+	res, err := postgres.Db.Exec(`DELETE FROM users WHERE id=$1`, id)
 	if err != nil {
 		return err
 	}

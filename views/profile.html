@@ -41,7 +41,7 @@
             <div class="section-label">Welcome back,</div>
             <h1 class="section-title" id="userName">—</h1>
             <p class="profile-tag" id="userEmail">—</p>
-            <span class="status-badge status-approved" id="userStatus" style="margin-top:8px;display:inline-block;">approved</span>
+            <p style="margin-top:6px;font-size:12px;color:var(--text-muted);font-family:monospace;" id="userStudentId">—</p>
         </div>
     </div>
 
@@ -122,9 +122,7 @@ const user = JSON.parse(localStorage.getItem("user") || "{}");
 if (user.first_name) {
     document.getElementById("userName").textContent = user.first_name + " " + (user.last_name || "");
     document.getElementById("userEmail").textContent = user.email || "—";
-    const statusEl = document.getElementById("userStatus");
-    statusEl.textContent = user.status || "pending";
-    statusEl.className = "status-badge " + (user.status === "approved" ? "status-approved" : "status-pending");
+    document.getElementById("userStudentId").textContent = "ID: " + (user.student_id || "—");
 }
 
 // Load bookings for history

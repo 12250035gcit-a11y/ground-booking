@@ -37,10 +37,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	err = user.Login()
 	if err != nil {
-		if err.Error() == "account pending approval" {
-			httpReps.ResponseWithError(w, http.StatusForbidden, "account pending approval")
-			return
-		}
 		httpReps.ResponseWithError(w, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}
