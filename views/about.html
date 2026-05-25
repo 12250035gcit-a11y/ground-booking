@@ -109,38 +109,41 @@
         }
         .sched-row-past .sched-time { opacity: 0.45; }
 
-        /* Booked row — single compact row per booking */
+        /* Booked row — one compact line */
         .sched-slot-booked {
-            display: flex; flex-direction: column; justify-content: center;
-            padding: 10px 14px; min-height: 44px; gap: 2px;
+            display: flex; align-items: center; flex-wrap: nowrap;
+            padding: 0 14px; min-height: 44px; gap: 6px; overflow: hidden;
         }
         .sched-slot-booked.status-approved {
-            background: linear-gradient(135deg, #fde8e8, #fce4e4);
-            border-left: 3px solid #e63946;
+            background: #fde8e8; border-left: 3px solid #e63946;
         }
         .sched-slot-booked.status-pending {
-            background: linear-gradient(135deg, #fff3e0, #fef0d8);
-            border-left: 3px solid #f4a261;
+            background: #fff3e0; border-left: 3px solid #f4a261;
         }
         .sched-slot-booked.status-cancel_requested {
-            background: linear-gradient(135deg, #fde8e8, #fce4e4);
-            border-left: 3px dashed #e63946;
-            opacity: 0.8;
+            background: #fde8e8; border-left: 3px dashed #e63946; opacity: 0.75;
         }
-        .booked-who  { font-size: 12px; font-weight: 700; color: var(--green-dark); }
-        .booked-meta { font-size: 11px; color: var(--text-muted); }
+        .booked-dot {
+            width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+        }
+        .status-approved .booked-dot         { background: #e63946; }
+        .status-pending  .booked-dot         { background: #f4a261; }
+        .status-cancel_requested .booked-dot { background: #aaa; }
+        .booked-who  {
+            font-size: 12px; font-weight: 700; color: var(--green-dark);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; min-width: 0;
+        }
+        .booked-sep  { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+        .booked-meta { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
         .booked-status-chip {
-            display: inline-flex; align-items: center; gap: 4px;
+            margin-left: auto; flex-shrink: 0;
+            display: inline-flex; align-items: center; gap: 3px;
             font-size: 10px; font-weight: 700; padding: 2px 7px;
-            border-radius: 20px; margin-top: 3px; width: fit-content;
+            border-radius: 20px;
         }
         .chip-approved         { background: #fde8e8; color: #8b1a1a; border: 1px solid #f5c6c6; }
         .chip-pending          { background: #fff3e0; color: #7d4000; border: 1px solid #ffc896; }
         .chip-cancel_requested { background: #f0f0f0; color: #555;    border: 1px solid #ddd; }
-
-        /* time cell for a booking row shows start→end stacked */
-        .sched-time-range { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
-        .sched-time-range .t-end { font-size: 9px; opacity: 0.6; font-weight: 600; }
 
         /* ── Inline Booking Form ── */
         .inline-form-row {
@@ -376,10 +379,7 @@ function renderSchedule(date, bookings) {
 
         const timeCell = document.createElement('div');
         timeCell.className = 'sched-time';
-        timeCell.innerHTML = `<div class="sched-time-range">
-            <span>${formatLabel(booking.starting_time)}</span>
-            <span class="t-end">→ ${formatLabel(booking.ending_time)}</span>
-        </div>`;
+        timeCell.textContent = formatLabel(booking.starting_time);
         row.appendChild(timeCell);
 
         const content = document.createElement('div');
@@ -387,11 +387,13 @@ function renderSchedule(date, bookings) {
         const chipLabel =
             booking.status === 'approved'        ? '<i class="fas fa-check-circle"></i> Approved' :
             booking.status === 'pending'          ? '<i class="fas fa-clock"></i> Pending' :
-            booking.status === 'cancel_requested' ? '<i class="fas fa-hourglass-half"></i> Cancel requested' :
+            booking.status === 'cancel_requested' ? '<i class="fas fa-hourglass-half"></i> Cancel req.' :
             booking.status;
         content.innerHTML = `
+            <div class="booked-dot"></div>
             <div class="booked-who">${booking.student_id}</div>
-            <div class="booked-meta">${booking.match_type || '—'} &nbsp;·&nbsp; ${booking.starting_time}–${booking.ending_time}</div>
+            <span class="booked-sep">·</span>
+            <div class="booked-meta">${booking.match_type || '—'} &nbsp;${booking.starting_time}–${booking.ending_time}</div>
             <span class="booked-status-chip chip-${booking.status}">${chipLabel}</span>`;
         row.appendChild(content);
         sched.appendChild(row);

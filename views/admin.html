@@ -21,7 +21,6 @@
             transition: background var(--transition); white-space: nowrap;
         }
         .btn-approve:hover { background: var(--green-dark); }
-
         .btn-reject {
             background: #fde8e8; color: #8b1a1a; border: 1px solid #f5c6c6;
             padding: 7px 14px; border-radius: var(--radius-sm);
@@ -29,7 +28,6 @@
             transition: background var(--transition); white-space: nowrap;
         }
         .btn-reject:hover { background: #f5c6c6; }
-
         .btn-confirm-cancel {
             background: #d8f3dc; color: #1a3a2a; border: 1px solid #a8d5b5;
             padding: 7px 14px; border-radius: var(--radius-sm);
@@ -37,7 +35,6 @@
             transition: background var(--transition); white-space: nowrap;
         }
         .btn-confirm-cancel:hover { background: #b7e4c7; }
-
         .btn-deny-cancel {
             background: #fff3cd; color: #7d5a00; border: 1px solid #ffd966;
             padding: 7px 14px; border-radius: var(--radius-sm);
@@ -45,15 +42,7 @@
             transition: background var(--transition); white-space: nowrap;
         }
         .btn-deny-cancel:hover { background: #ffd966; }
-
         .action-cell { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-
-        /* ── Pending count badge on tab ── */
-        .pending-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
-            width: 18px; height: 18px; border-radius: 50%; margin-left: 6px; line-height: 1;
-        }
 
         /* ── Section divider ── */
         .section-divider {
@@ -71,22 +60,130 @@
         }
         .empty-state i { font-size: 24px; margin-bottom: 8px; display: block; color: var(--green-light); }
 
-        /* ── Conflict warning chip ── */
+        /* ── Conflict chip ── */
         .conflict-chip {
             display: inline-flex; align-items: center; gap: 3px;
             background: #fff0e0; border: 1px solid #ffc896; color: #7d4000;
             font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
             cursor: help; white-space: nowrap;
         }
+
+        /* ── Admin body: sidebar + content ── */
+        .admin-body {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* ── Sidebar nav ── */
+        .admin-nav {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 80px;
+        }
+        .admin-nav-title {
+            padding: 12px 16px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            background: var(--green-bg);
+        }
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 16px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            border-bottom: 1px solid var(--border);
+            transition: background var(--transition), color var(--transition), border-color var(--transition);
+            user-select: none;
+        }
+        .admin-nav-item:last-child { border-bottom: none; }
+        .admin-nav-item i { width: 16px; text-align: center; font-size: 13px; flex-shrink: 0; }
+        .admin-nav-item:hover {
+            background: var(--green-bg);
+            color: var(--green-dark);
+        }
+        .admin-nav-item.active {
+            background: var(--green-bg);
+            color: var(--green-mid);
+            border-left-color: var(--green-mid);
+        }
+        .nav-count {
+            margin-left: auto;
+            background: var(--red);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+
+        /* ── Section panes ── */
+        .section-pane { display: none; }
+        .section-pane.active { display: block; }
+
+        /* ── Mobile: sidebar becomes horizontal scroll bar ── */
+        @media (max-width: 768px) {
+            .admin-body {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .admin-nav {
+                position: static;
+                display: flex;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                border-radius: var(--radius);
+            }
+            .admin-nav::-webkit-scrollbar { display: none; }
+            .admin-nav-title { display: none; }
+            .admin-nav-item {
+                flex-direction: column;
+                gap: 4px;
+                padding: 11px 18px;
+                font-size: 11px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                border-right: 1px solid var(--border);
+                white-space: nowrap;
+                flex-shrink: 0;
+                text-align: center;
+            }
+            .admin-nav-item:last-child { border-right: none; }
+            .admin-nav-item.active {
+                border-left: none;
+                border-bottom-color: var(--green-mid);
+                background: var(--green-bg);
+            }
+            .admin-nav-item i { font-size: 15px; width: auto; }
+            .nav-count { margin-left: 0; margin-top: 2px; }
+        }
     </style>
 </head>
 <body>
 
-<!-- Auth guard — redirect to login if not an admin -->
 <script>
-    if (!localStorage.getItem("admin")) {
-        window.location.replace("admin-login.html");
-    }
+    if (!localStorage.getItem("admin")) window.location.replace("admin-login.html");
 </script>
 
 <header>
@@ -108,7 +205,7 @@
 
 <div class="page-hero">
     <h1>Admin Dashboard</h1>
-    <p>Manage user registrations, booking approvals, and cancellation requests</p>
+    <p>Manage registrations, booking approvals, and cancellation requests</p>
 </div>
 
 <div class="admin-layout">
@@ -133,73 +230,90 @@
         </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="admin-tabs">
-        <button class="admin-tab active" onclick="switchTab('users', this)">User Registrations</button>
-        <button class="admin-tab" id="bookingTabBtn" onclick="switchTab('bookings', this)">Booking Approvals</button>
-        <button class="admin-tab" onclick="switchTab('allbookings', this)">All Bookings</button>
-    </div>
+    <!-- Sidebar nav + content -->
+    <div class="admin-body">
 
-    <!-- ── Users ── -->
-    <div class="tab-pane active" id="tab-users">
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr><th>Name</th><th>Email</th><th>Phone</th><th>Action</th></tr>
-                </thead>
-                <tbody id="usersList">
-                    <tr><td colspan="4" style="text-align:center;padding:20px;">Loading…</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+        <nav class="admin-nav">
+            <div class="admin-nav-title">Navigation</div>
+            <div class="admin-nav-item active" onclick="switchSection('users', this)">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="admin-nav-item" id="navBookings" onclick="switchSection('bookings', this)">
+                <i class="fas fa-calendar-check"></i>
+                <span>Approvals</span>
+                <span class="nav-count" id="navCount" style="display:none;"></span>
+            </div>
+            <div class="admin-nav-item" onclick="switchSection('allbookings', this)">
+                <i class="fas fa-list-ul"></i>
+                <span>All Bookings</span>
+            </div>
+        </nav>
 
-    <!-- ── Booking Approvals (pending + cancel requests) ── -->
-    <div class="tab-pane" id="tab-bookings">
+        <div class="admin-content">
 
-        <div class="section-divider">Pending Approval</div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th><th>Email</th><th>Type</th>
-                        <th>Date</th><th>Time</th><th>Submitted</th>
-                        <th>Notes</th><th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="pendingList">
-                    <tr><td colspan="8" style="text-align:center;padding:20px;">Loading…</td></tr>
-                </tbody>
-            </table>
-        </div>
+            <!-- Users -->
+            <div class="section-pane active" id="tab-users">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="usersList">
+                            <tr><td colspan="4" style="text-align:center;padding:20px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        <div class="section-divider" style="margin-top:8px;">Cancellation Requests</div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr><th>#</th><th>Email</th><th>Type</th><th>Date</th><th>Time</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="cancelList">
-                    <tr><td colspan="6" style="text-align:center;padding:20px;">Loading…</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <!-- Approvals -->
+            <div class="section-pane" id="tab-bookings">
+                <div class="section-divider">Pending Approval</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Email</th><th>Type</th>
+                                <th>Date</th><th>Time</th><th>Submitted</th>
+                                <th>Notes</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingList">
+                            <tr><td colspan="8" style="text-align:center;padding:20px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
 
-    <!-- ── All Bookings ── -->
-    <div class="tab-pane" id="tab-allbookings">
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th><th>Email</th><th>Type</th>
-                        <th>Date</th><th>Time</th><th>Status</th><th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="allBookingsList">
-                    <tr><td colspan="7" style="text-align:center;padding:20px;">Loading…</td></tr>
-                </tbody>
-            </table>
+                <div class="section-divider" style="margin-top:8px;">Cancellation Requests</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>#</th><th>Email</th><th>Type</th><th>Date</th><th>Time</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="cancelList">
+                            <tr><td colspan="6" style="text-align:center;padding:20px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- All Bookings -->
+            <div class="section-pane" id="tab-allbookings">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Email</th><th>Type</th>
+                                <th>Date</th><th>Time</th><th>Status</th><th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allBookingsList">
+                            <tr><td colspan="7" style="text-align:center;padding:20px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -214,18 +328,13 @@
 <script src="js/ui.js"></script>
 <script src="js/admin.js"></script>
 <script>
-/* ================================================================
-   Admin Dashboard — all dashboard logic lives here.
-   admin.js is auth-only (adminLogin / adminLogout / showError).
-   ================================================================ */
-
 function toggleNav() { document.getElementById('mainNav').classList.toggle('open'); }
 
-function switchTab(name, btn) {
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+function switchSection(name, el) {
+    document.querySelectorAll('.section-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
-    btn.classList.add('active');
+    el.classList.add('active');
 }
 
 /* ── Helpers ── */
@@ -244,10 +353,8 @@ function statusBadge(status) {
 
 function conflictsWith(b, list) {
     return list.filter(p =>
-        p.id !== b.id &&
-        p.date === b.date &&
-        p.starting_time < b.ending_time &&
-        p.ending_time > b.starting_time
+        p.id !== b.id && p.date === b.date &&
+        p.starting_time < b.ending_time && p.ending_time > b.starting_time
     ).map(p => p.id);
 }
 
@@ -269,8 +376,8 @@ async function loadBookings() {
         const bookings = await res.json();
         const list     = Array.isArray(bookings) ? bookings : [];
 
-        const pending  = list.filter(b => b.status === "pending");
-        const cancels  = list.filter(b => b.status === "cancel_requested");
+        const pending = list.filter(b => b.status === "pending");
+        const cancels = list.filter(b => b.status === "cancel_requested");
 
         renderPending(pending, list);
         renderCancels(cancels);
@@ -280,10 +387,14 @@ async function loadBookings() {
         document.getElementById("statPending").textContent  = pending.length;
         document.getElementById("statCancels").textContent  = cancels.length;
 
-        const total = pending.length + cancels.length;
-        document.getElementById("bookingTabBtn").innerHTML =
-            'Booking Approvals' + (total ? `<span class="pending-badge">${total}</span>` : '');
-
+        const total   = pending.length + cancels.length;
+        const counter = document.getElementById("navCount");
+        if (total > 0) {
+            counter.textContent    = total;
+            counter.style.display  = "inline-flex";
+        } else {
+            counter.style.display  = "none";
+        }
     } catch (e) { console.error("loadBookings:", e); }
 }
 
@@ -291,13 +402,10 @@ async function loadBookings() {
 
 function renderUsers(users) {
     const tbody = document.getElementById("usersList");
-    if (!tbody) return;
-
     if (!users.length) {
         tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><i class="fas fa-users"></i>No registered users yet.</div></td></tr>`;
         return;
     }
-
     tbody.innerHTML = users.map(u => `
         <tr id="user-row-${u.id}">
             <td><strong>${u.first_name} ${u.last_name}</strong></td>
@@ -314,19 +422,15 @@ function renderUsers(users) {
 
 function renderPending(pending, allBookings) {
     const tbody = document.getElementById("pendingList");
-    if (!tbody) return;
-
     if (!pending.length) {
-        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-check-circle"></i>No pending bookings — all caught up!</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-check-circle"></i>No pending bookings.</div></td></tr>`;
         return;
     }
-
     tbody.innerHTML = pending.map(b => {
-        const conflicts = conflictsWith(b, pending);
-        const conflictTag = conflicts.length
-            ? `<span class="conflict-chip" title="Overlaps with booking #${conflicts.join(', #')}">⚠ Conflict</span>`
-            : '';
-        const submitted = b.created_at ? b.created_at.substring(0, 16) : '–';
+        const conflicts    = conflictsWith(b, pending);
+        const conflictTag  = conflicts.length
+            ? `<span class="conflict-chip" title="Overlaps with #${conflicts.join(', #')}">⚠ Conflict</span>` : '';
+        const submitted    = b.created_at ? b.created_at.substring(0, 16) : '–';
         return `
         <tr id="pending-row-${b.id}">
             <td>${b.id} ${conflictTag}</td>
@@ -337,12 +441,8 @@ function renderPending(pending, allBookings) {
             <td style="font-size:11px;color:var(--text-muted);">${submitted}</td>
             <td style="max-width:140px;font-size:12px;color:var(--text-muted);">${b.notes || "–"}</td>
             <td class="action-cell">
-                <button class="btn-approve" onclick="approveBooking(${b.id})">
-                    <i class="fas fa-check"></i> Approve
-                </button>
-                <button class="btn-reject" onclick="rejectBooking(${b.id})">
-                    <i class="fas fa-times"></i> Reject
-                </button>
+                <button class="btn-approve" onclick="approveBooking(${b.id})"><i class="fas fa-check"></i> Approve</button>
+                <button class="btn-reject"  onclick="rejectBooking(${b.id})"><i class="fas fa-times"></i> Reject</button>
             </td>
         </tr>`;
     }).join('');
@@ -350,13 +450,10 @@ function renderPending(pending, allBookings) {
 
 function renderCancels(cancels) {
     const tbody = document.getElementById("cancelList");
-    if (!tbody) return;
-
     if (!cancels.length) {
         tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-check-circle"></i>No cancellation requests.</div></td></tr>`;
         return;
     }
-
     tbody.innerHTML = cancels.map(b => `
         <tr id="cancel-row-${b.id}">
             <td>${b.id}</td>
@@ -365,12 +462,8 @@ function renderCancels(cancels) {
             <td>${b.date}</td>
             <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
             <td class="action-cell">
-                <button class="btn-confirm-cancel" onclick="approveCancelBooking(${b.id})">
-                    <i class="fas fa-check"></i> Confirm Cancel
-                </button>
-                <button class="btn-deny-cancel" onclick="denyCancelBooking(${b.id})">
-                    <i class="fas fa-times"></i> Deny
-                </button>
+                <button class="btn-confirm-cancel" onclick="approveCancelBooking(${b.id})"><i class="fas fa-check"></i> Confirm</button>
+                <button class="btn-deny-cancel"    onclick="denyCancelBooking(${b.id})"><i class="fas fa-times"></i> Deny</button>
             </td>
         </tr>`
     ).join('');
@@ -378,13 +471,10 @@ function renderCancels(cancels) {
 
 function renderAllBookings(bookings) {
     const tbody = document.getElementById("allBookingsList");
-    if (!tbody) return;
-
     if (!bookings.length) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">No bookings found.</td></tr>`;
         return;
     }
-
     tbody.innerHTML = bookings.map(b => `
         <tr>
             <td>${b.id}</td>
@@ -394,9 +484,7 @@ function renderAllBookings(bookings) {
             <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
             <td>${statusBadge(b.status)}</td>
             <td class="action-cell">
-                <button class="btn-reject" onclick="deleteBooking(${b.id})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
+                <button class="btn-reject" onclick="deleteBooking(${b.id})"><i class="fas fa-trash"></i> Delete</button>
             </td>
         </tr>`
     ).join('');
@@ -405,19 +493,14 @@ function renderAllBookings(bookings) {
 /* ── Actions ── */
 
 async function approveBooking(id) {
-    const ok = await gcitConfirm({
-        title: "Approve booking?",
-        message: "Other pending requests for this slot will be automatically rejected.",
-        confirmText: "Approve",
-    });
+    const ok = await gcitConfirm({ title: "Approve booking?", message: "Conflicting pending requests will be auto-rejected.", confirmText: "Approve" });
     if (!ok) return;
     try {
         const res    = await fetch(`/booking/${id}/approve`, { method: "PUT" });
         const result = await res.json().catch(() => ({}));
         if (!res.ok) { gcitToast(result.error || "Approval failed", "error"); return; }
-        gcitToast(result.auto_rejected > 0
-            ? `Booking approved. ${result.auto_rejected} conflicting request(s) auto-rejected.`
-            : "Booking approved.",
+        gcitToast(
+            result.auto_rejected > 0 ? `Approved. ${result.auto_rejected} conflict(s) auto-rejected.` : "Booking approved.",
             result.auto_rejected > 0 ? "info" : "success", 5000
         );
         loadBookings();
@@ -425,71 +508,47 @@ async function approveBooking(id) {
 }
 
 async function rejectBooking(id) {
-    const ok = await gcitConfirm({
-        title: "Reject booking?",
-        message: "The user will see this request as rejected.",
-        confirmText: "Reject",
-        danger: true,
-    });
+    const ok = await gcitConfirm({ title: "Reject booking?", message: "The user will see this as rejected.", confirmText: "Reject", danger: true });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/reject`, { method: "PUT" });
         if (res.ok) { gcitToast("Booking rejected.", "info"); loadBookings(); }
-        else gcitToast("Failed to reject booking", "error");
+        else gcitToast("Failed to reject", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function approveCancelBooking(id) {
-    const ok = await gcitConfirm({
-        title: "Confirm cancellation?",
-        message: "The slot will become available again.",
-        confirmText: "Confirm",
-    });
+    const ok = await gcitConfirm({ title: "Confirm cancellation?", message: "The slot will become available again.", confirmText: "Confirm" });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/approve-cancel`, { method: "PUT" });
-        if (res.ok) { gcitToast("Cancellation confirmed — slot is now free."); loadBookings(); }
-        else gcitToast("Failed to confirm cancellation", "error");
+        if (res.ok) { gcitToast("Cancellation confirmed — slot is free."); loadBookings(); }
+        else gcitToast("Failed to confirm", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function denyCancelBooking(id) {
-    const ok = await gcitConfirm({
-        title: "Deny cancellation?",
-        message: "The booking will remain approved.",
-        confirmText: "Deny",
-        danger: true,
-    });
+    const ok = await gcitConfirm({ title: "Deny cancellation?", message: "The booking will stay approved.", confirmText: "Deny", danger: true });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/deny-cancel`, { method: "PUT" });
-        if (res.ok) { gcitToast("Cancellation request denied.", "info"); loadBookings(); }
-        else gcitToast("Failed to deny cancellation", "error");
+        if (res.ok) { gcitToast("Cancellation denied.", "info"); loadBookings(); }
+        else gcitToast("Failed to deny", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function deleteBooking(id) {
-    const ok = await gcitConfirm({
-        title: "Delete booking?",
-        message: "This action cannot be undone.",
-        confirmText: "Delete",
-        danger: true,
-    });
+    const ok = await gcitConfirm({ title: "Delete booking?", message: "This cannot be undone.", confirmText: "Delete", danger: true });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}`, { method: "DELETE" });
         if (res.ok) { gcitToast("Booking deleted.", "info"); loadBookings(); }
-        else gcitToast("Failed to delete booking", "error");
+        else gcitToast("Failed to delete", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function deleteUser(id) {
-    const ok = await gcitConfirm({
-        title: "Delete user?",
-        message: "All their data will be permanently removed.",
-        confirmText: "Delete",
-        danger: true,
-    });
+    const ok = await gcitConfirm({ title: "Delete user?", message: "All their data will be permanently removed.", confirmText: "Delete", danger: true });
     if (!ok) return;
     try {
         const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
@@ -498,7 +557,6 @@ async function deleteUser(id) {
     } catch { gcitToast("Server error", "error"); }
 }
 
-/* ── Init ── */
 document.addEventListener("DOMContentLoaded", () => {
     loadUsers();
     loadBookings();
