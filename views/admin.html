@@ -6,66 +6,88 @@
     <title>Admin Dashboard – GCIT Ground Booking</title>
     <link rel="stylesheet" href="css/home.css">
     <style>
-        .pending-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: var(--red); color: white; font-size: 10px; font-weight: 700;
-            width: 18px; height: 18px; border-radius: 50%; margin-left: 6px; line-height: 1;
-        }
+        /* ── Status badge extras ── */
         .badge-pending          { background: #fff3cd; color: #7d5a00; }
         .badge-approved         { background: #d8f3dc; color: #1a3a2a; }
         .badge-rejected         { background: #fde8e8; color: #8b1a1a; }
         .badge-cancel_requested { background: #fff0e0; color: #7d4000; }
         .badge-cancelled        { background: #f0f0f0; color: #555; }
 
-        /* Action buttons — bigger and clearer */
+        /* ── Action buttons ── */
         .btn-approve {
-            background: var(--green-mid); color: white; border: none;
-            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
-            font-family: inherit; font-size: 12px; font-weight: 700;
+            background: var(--green-mid); color: #fff; border: none;
+            padding: 7px 14px; border-radius: var(--radius-sm);
+            cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700;
             transition: background var(--transition); white-space: nowrap;
         }
         .btn-approve:hover { background: var(--green-dark); }
 
         .btn-reject {
             background: #fde8e8; color: #8b1a1a; border: 1px solid #f5c6c6;
-            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
-            font-family: inherit; font-size: 12px; font-weight: 700;
+            padding: 7px 14px; border-radius: var(--radius-sm);
+            cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700;
             transition: background var(--transition); white-space: nowrap;
         }
         .btn-reject:hover { background: #f5c6c6; }
 
         .btn-confirm-cancel {
             background: #d8f3dc; color: #1a3a2a; border: 1px solid #a8d5b5;
-            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
-            font-family: inherit; font-size: 12px; font-weight: 700; white-space: nowrap;
+            padding: 7px 14px; border-radius: var(--radius-sm);
+            cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700;
+            transition: background var(--transition); white-space: nowrap;
         }
         .btn-confirm-cancel:hover { background: #b7e4c7; }
 
         .btn-deny-cancel {
             background: #fff3cd; color: #7d5a00; border: 1px solid #ffd966;
-            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
-            font-family: inherit; font-size: 12px; font-weight: 700; white-space: nowrap;
+            padding: 7px 14px; border-radius: var(--radius-sm);
+            cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700;
+            transition: background var(--transition); white-space: nowrap;
         }
         .btn-deny-cancel:hover { background: #ffd966; }
 
         .action-cell { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 
-        /* Empty state */
-        .empty-state { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
-        .empty-state i { font-size: 24px; margin-bottom: 8px; display: block; color: var(--green-light); }
+        /* ── Pending count badge on tab ── */
+        .pending-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
+            width: 18px; height: 18px; border-radius: 50%; margin-left: 6px; line-height: 1;
+        }
 
-        /* Section divider inside approvals tab */
+        /* ── Section divider ── */
         .section-divider {
             display: flex; align-items: center; gap: 10px;
-            padding: 10px 0 6px; color: var(--text-muted);
+            padding: 14px 0 8px; color: var(--text-muted);
             font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
         }
         .section-divider::before, .section-divider::after {
             content: ""; flex: 1; height: 1px; background: var(--border);
         }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px;
+        }
+        .empty-state i { font-size: 24px; margin-bottom: 8px; display: block; color: var(--green-light); }
+
+        /* ── Conflict warning chip ── */
+        .conflict-chip {
+            display: inline-flex; align-items: center; gap: 3px;
+            background: #fff0e0; border: 1px solid #ffc896; color: #7d4000;
+            font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+            cursor: help; white-space: nowrap;
+        }
     </style>
 </head>
 <body>
+
+<!-- Auth guard — redirect to login if not an admin -->
+<script>
+    if (!localStorage.getItem("admin")) {
+        window.location.replace("admin-login.html");
+    }
+</script>
 
 <header>
     <div class="nav-logo">
@@ -91,7 +113,7 @@
 
 <div class="admin-layout">
 
-    <!-- Stats -->
+    <!-- Stats row -->
     <div class="admin-stats">
         <div class="stat-card">
             <div class="num" id="statTotal">–</div>
@@ -102,11 +124,11 @@
             <div class="lbl">Total Bookings</div>
         </div>
         <div class="stat-card">
-            <div class="num" id="statPendingBookings">–</div>
+            <div class="num" id="statPending">–</div>
             <div class="lbl">Pending Approvals</div>
         </div>
         <div class="stat-card">
-            <div class="num" id="statCancelRequests">–</div>
+            <div class="num" id="statCancels">–</div>
             <div class="lbl">Cancel Requests</div>
         </div>
     </div>
@@ -118,87 +140,64 @@
         <button class="admin-tab" onclick="switchTab('allbookings', this)">All Bookings</button>
     </div>
 
-    <!-- Users Tab -->
+    <!-- ── Users ── -->
     <div class="tab-pane active" id="tab-users">
         <div class="table-wrap">
             <table>
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Action</th>
-                    </tr>
+                    <tr><th>Name</th><th>Email</th><th>Phone</th><th>Action</th></tr>
                 </thead>
                 <tbody id="usersList">
-                    <tr><td colspan="4" style="text-align:center;padding:20px;">Loading...</td></tr>
+                    <tr><td colspan="4" style="text-align:center;padding:20px;">Loading…</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Booking Approvals Tab (pending + cancel requests) -->
+    <!-- ── Booking Approvals (pending + cancel requests) ── -->
     <div class="tab-pane" id="tab-bookings">
-        <!-- Pending Bookings -->
+
         <div class="section-divider">Pending Approval</div>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Email</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Submitted</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
+                        <th>#</th><th>Email</th><th>Type</th>
+                        <th>Date</th><th>Time</th><th>Submitted</th>
+                        <th>Notes</th><th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="pendingBookingsList">
-                    <tr><td colspan="8" style="text-align:center;padding:20px;">Loading...</td></tr>
+                <tbody id="pendingList">
+                    <tr><td colspan="8" style="text-align:center;padding:20px;">Loading…</td></tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Cancel Requests -->
-        <div class="section-divider" style="margin-top:20px;">Cancellation Requests</div>
+        <div class="section-divider" style="margin-top:8px;">Cancellation Requests</div>
         <div class="table-wrap">
             <table>
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Email</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>#</th><th>Email</th><th>Type</th><th>Date</th><th>Time</th><th>Actions</th></tr>
                 </thead>
-                <tbody id="cancelRequestsList">
-                    <tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>
+                <tbody id="cancelList">
+                    <tr><td colspan="6" style="text-align:center;padding:20px;">Loading…</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- All Bookings Tab -->
+    <!-- ── All Bookings ── -->
     <div class="tab-pane" id="tab-allbookings">
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Email</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>#</th><th>Email</th><th>Type</th>
+                        <th>Date</th><th>Time</th><th>Status</th><th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="adminBookingsList">
-                    <tr><td colspan="7" style="text-align:center;padding:20px;">Loading...</td></tr>
+                <tbody id="allBookingsList">
+                    <tr><td colspan="7" style="text-align:center;padding:20px;">Loading…</td></tr>
                 </tbody>
             </table>
         </div>
@@ -215,53 +214,21 @@
 <script src="js/ui.js"></script>
 <script src="js/admin.js"></script>
 <script>
+/* ================================================================
+   Admin Dashboard — all dashboard logic lives here.
+   admin.js is auth-only (adminLogin / adminLogout / showError).
+   ================================================================ */
+
+function toggleNav() { document.getElementById('mainNav').classList.toggle('open'); }
+
 function switchTab(name, btn) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     btn.classList.add('active');
 }
-function toggleNav() { document.getElementById('mainNav').classList.toggle('open'); }
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadUsersWithStats();
-    loadAllBookingsWithStats();
-});
-
-async function loadUsersWithStats() {
-    try {
-        const res = await fetch("/admin/users");
-        const users = await res.json();
-        const list = Array.isArray(users) ? users : [];
-        renderUsers(list);
-        document.getElementById("statTotal").textContent = list.length;
-    } catch(e) { console.error(e); }
-}
-
-async function loadAllBookingsWithStats() {
-    try {
-        const res = await fetch("/bookings");
-        const bookings = await res.json();
-        const list = Array.isArray(bookings) ? bookings : [];
-
-        const pending  = list.filter(b => b.status === "pending");
-        const cancels  = list.filter(b => b.status === "cancel_requested");
-
-        renderAdminBookings(list);
-        renderPendingBookings(pending, list);
-        renderCancelRequests(cancels);
-
-        document.getElementById("statBookings").textContent       = list.length;
-        document.getElementById("statPendingBookings").textContent = pending.length;
-        document.getElementById("statCancelRequests").textContent  = cancels.length;
-
-        const totalActions = pending.length + cancels.length;
-        const tabBtn = document.getElementById("bookingTabBtn");
-        tabBtn.innerHTML = 'Booking Approvals' +
-            (totalActions ? `<span class="pending-badge">${totalActions}</span>` : '');
-
-    } catch(e) { console.error(e); }
-}
+/* ── Helpers ── */
 
 function statusBadge(status) {
     const map = {
@@ -275,15 +242,78 @@ function statusBadge(status) {
     return `<span class="status-badge ${s.cls}">${s.label}</span>`;
 }
 
-// Returns IDs of bookings whose time overlaps with booking b (among the pending list)
-function conflictingIds(b, pendingList) {
-    return pendingList
-        .filter(p => p.id !== b.id && p.date === b.date && p.starting_time < b.ending_time && p.ending_time > b.starting_time)
-        .map(p => p.id);
+function conflictsWith(b, list) {
+    return list.filter(p =>
+        p.id !== b.id &&
+        p.date === b.date &&
+        p.starting_time < b.ending_time &&
+        p.ending_time > b.starting_time
+    ).map(p => p.id);
 }
 
-function renderPendingBookings(pending, allBookings) {
-    const tbody = document.getElementById("pendingBookingsList");
+/* ── Data loading ── */
+
+async function loadUsers() {
+    try {
+        const res   = await fetch("/admin/users");
+        const users = await res.json();
+        const list  = Array.isArray(users) ? users : [];
+        renderUsers(list);
+        document.getElementById("statTotal").textContent = list.length;
+    } catch (e) { console.error("loadUsers:", e); }
+}
+
+async function loadBookings() {
+    try {
+        const res      = await fetch("/bookings");
+        const bookings = await res.json();
+        const list     = Array.isArray(bookings) ? bookings : [];
+
+        const pending  = list.filter(b => b.status === "pending");
+        const cancels  = list.filter(b => b.status === "cancel_requested");
+
+        renderPending(pending, list);
+        renderCancels(cancels);
+        renderAllBookings(list);
+
+        document.getElementById("statBookings").textContent = list.length;
+        document.getElementById("statPending").textContent  = pending.length;
+        document.getElementById("statCancels").textContent  = cancels.length;
+
+        const total = pending.length + cancels.length;
+        document.getElementById("bookingTabBtn").innerHTML =
+            'Booking Approvals' + (total ? `<span class="pending-badge">${total}</span>` : '');
+
+    } catch (e) { console.error("loadBookings:", e); }
+}
+
+/* ── Renderers ── */
+
+function renderUsers(users) {
+    const tbody = document.getElementById("usersList");
+    if (!tbody) return;
+
+    if (!users.length) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><i class="fas fa-users"></i>No registered users yet.</div></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+        <tr id="user-row-${u.id}">
+            <td><strong>${u.first_name} ${u.last_name}</strong></td>
+            <td style="font-size:13px;">${u.email}</td>
+            <td>${u.phone || "–"}</td>
+            <td class="action-cell">
+                <button class="btn-reject" onclick="deleteUser(${u.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        </tr>`
+    ).join('');
+}
+
+function renderPending(pending, allBookings) {
+    const tbody = document.getElementById("pendingList");
     if (!tbody) return;
 
     if (!pending.length) {
@@ -292,29 +322,34 @@ function renderPendingBookings(pending, allBookings) {
     }
 
     tbody.innerHTML = pending.map(b => {
-        const conflicts = conflictingIds(b, pending);
-        const conflictWarning = conflicts.length
-            ? `<span title="Conflicts with booking #${conflicts.join(', #')}" style="color:#e63946;font-size:11px;font-weight:700;margin-left:4px;cursor:help;">⚠ Conflict</span>` : '';
-        const submittedAt = b.created_at ? b.created_at.substring(0, 16) : '–';
+        const conflicts = conflictsWith(b, pending);
+        const conflictTag = conflicts.length
+            ? `<span class="conflict-chip" title="Overlaps with booking #${conflicts.join(', #')}">⚠ Conflict</span>`
+            : '';
+        const submitted = b.created_at ? b.created_at.substring(0, 16) : '–';
         return `
         <tr id="pending-row-${b.id}">
-            <td>${b.id}${conflictWarning}</td>
+            <td>${b.id} ${conflictTag}</td>
             <td><strong>${b.student_id}</strong></td>
             <td>${b.match_type || "–"}</td>
             <td>${b.date}</td>
             <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
-            <td style="font-size:11px;color:var(--text-muted);">${submittedAt}</td>
+            <td style="font-size:11px;color:var(--text-muted);">${submitted}</td>
             <td style="max-width:140px;font-size:12px;color:var(--text-muted);">${b.notes || "–"}</td>
             <td class="action-cell">
-                <button class="btn-approve" onclick="approveBooking(${b.id})"><i class="fas fa-check"></i> Approve</button>
-                <button class="btn-reject"  onclick="rejectBooking(${b.id})"><i class="fas fa-times"></i> Reject</button>
+                <button class="btn-approve" onclick="approveBooking(${b.id})">
+                    <i class="fas fa-check"></i> Approve
+                </button>
+                <button class="btn-reject" onclick="rejectBooking(${b.id})">
+                    <i class="fas fa-times"></i> Reject
+                </button>
             </td>
         </tr>`;
     }).join('');
 }
 
-function renderCancelRequests(cancels) {
-    const tbody = document.getElementById("cancelRequestsList");
+function renderCancels(cancels) {
+    const tbody = document.getElementById("cancelList");
     if (!tbody) return;
 
     if (!cancels.length) {
@@ -330,19 +365,23 @@ function renderCancelRequests(cancels) {
             <td>${b.date}</td>
             <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
             <td class="action-cell">
-                <button class="btn-confirm-cancel" onclick="approveCancelBooking(${b.id})"><i class="fas fa-check"></i> Confirm Cancel</button>
-                <button class="btn-deny-cancel"    onclick="denyCancelBooking(${b.id})"><i class="fas fa-times"></i> Deny</button>
+                <button class="btn-confirm-cancel" onclick="approveCancelBooking(${b.id})">
+                    <i class="fas fa-check"></i> Confirm Cancel
+                </button>
+                <button class="btn-deny-cancel" onclick="denyCancelBooking(${b.id})">
+                    <i class="fas fa-times"></i> Deny
+                </button>
             </td>
         </tr>`
     ).join('');
 }
 
-function renderAdminBookings(bookings) {
-    const tbody = document.getElementById("adminBookingsList");
+function renderAllBookings(bookings) {
+    const tbody = document.getElementById("allBookingsList");
     if (!tbody) return;
 
     if (!bookings.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">No bookings found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">No bookings found.</td></tr>`;
         return;
     }
 
@@ -354,103 +393,116 @@ function renderAdminBookings(bookings) {
             <td>${b.date}</td>
             <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
             <td>${statusBadge(b.status)}</td>
-            <td>
-                <button class="btn-reject" onclick="deleteAdminBooking(${b.id})"><i class="fas fa-trash"></i> Delete</button>
-            </td>
-        </tr>`
-    ).join('');
-}
-
-function renderUsers(users) {
-    const tbody = document.getElementById("usersList");
-    if (!tbody) return;
-
-    if (!users.length) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;">No users found</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = users.map(u => `
-        <tr id="user-row-${u.id}">
-            <td>${u.first_name} ${u.last_name}</td>
-            <td>${u.email}</td>
-            <td>${u.phone || "–"}</td>
             <td class="action-cell">
-                <button class="btn-reject" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i> Delete</button>
+                <button class="btn-reject" onclick="deleteBooking(${b.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
             </td>
         </tr>`
     ).join('');
 }
+
+/* ── Actions ── */
 
 async function approveBooking(id) {
     const ok = await gcitConfirm({
         title: "Approve booking?",
-        message: "Any other pending requests for this slot will be automatically rejected.",
+        message: "Other pending requests for this slot will be automatically rejected.",
         confirmText: "Approve",
     });
     if (!ok) return;
     try {
-        const res = await fetch(`/booking/${id}/approve`, { method: "PUT" });
+        const res    = await fetch(`/booking/${id}/approve`, { method: "PUT" });
         const result = await res.json().catch(() => ({}));
         if (!res.ok) { gcitToast(result.error || "Approval failed", "error"); return; }
-        if (result.auto_rejected > 0) {
-            gcitToast(`Booking approved. ${result.auto_rejected} conflicting request(s) auto-rejected.`, "info", 5000);
-        } else {
-            gcitToast("Booking approved.");
-        }
-        loadAllBookingsWithStats();
+        gcitToast(result.auto_rejected > 0
+            ? `Booking approved. ${result.auto_rejected} conflicting request(s) auto-rejected.`
+            : "Booking approved.",
+            result.auto_rejected > 0 ? "info" : "success", 5000
+        );
+        loadBookings();
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function rejectBooking(id) {
-    const ok = await gcitConfirm({ title: "Reject booking?", message: "The user will see this request as rejected.", confirmText: "Reject", danger: true });
+    const ok = await gcitConfirm({
+        title: "Reject booking?",
+        message: "The user will see this request as rejected.",
+        confirmText: "Reject",
+        danger: true,
+    });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/reject`, { method: "PUT" });
-        if (res.ok) { gcitToast("Booking rejected.", "info"); loadAllBookingsWithStats(); }
+        if (res.ok) { gcitToast("Booking rejected.", "info"); loadBookings(); }
         else gcitToast("Failed to reject booking", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function approveCancelBooking(id) {
-    const ok = await gcitConfirm({ title: "Confirm cancellation?", message: "The slot will become available again.", confirmText: "Confirm" });
+    const ok = await gcitConfirm({
+        title: "Confirm cancellation?",
+        message: "The slot will become available again.",
+        confirmText: "Confirm",
+    });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/approve-cancel`, { method: "PUT" });
-        if (res.ok) { gcitToast("Cancellation confirmed — slot is now free."); loadAllBookingsWithStats(); }
+        if (res.ok) { gcitToast("Cancellation confirmed — slot is now free."); loadBookings(); }
         else gcitToast("Failed to confirm cancellation", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function denyCancelBooking(id) {
-    const ok = await gcitConfirm({ title: "Deny cancellation?", message: "The booking will remain approved.", confirmText: "Deny", danger: true });
+    const ok = await gcitConfirm({
+        title: "Deny cancellation?",
+        message: "The booking will remain approved.",
+        confirmText: "Deny",
+        danger: true,
+    });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/deny-cancel`, { method: "PUT" });
-        if (res.ok) { gcitToast("Cancellation request denied.", "info"); loadAllBookingsWithStats(); }
+        if (res.ok) { gcitToast("Cancellation request denied.", "info"); loadBookings(); }
         else gcitToast("Failed to deny cancellation", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
-async function deleteAdminBooking(id) {
-    const ok = await gcitConfirm({ title: "Delete booking?", message: "This action cannot be undone.", confirmText: "Delete", danger: true });
+async function deleteBooking(id) {
+    const ok = await gcitConfirm({
+        title: "Delete booking?",
+        message: "This action cannot be undone.",
+        confirmText: "Delete",
+        danger: true,
+    });
     if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}`, { method: "DELETE" });
-        if (res.ok) { gcitToast("Booking deleted.", "info"); loadAllBookingsWithStats(); }
+        if (res.ok) { gcitToast("Booking deleted.", "info"); loadBookings(); }
         else gcitToast("Failed to delete booking", "error");
     } catch { gcitToast("Server error", "error"); }
 }
 
 async function deleteUser(id) {
-    const ok = await gcitConfirm({ title: "Delete user?", message: "All their data will be permanently removed.", confirmText: "Delete", danger: true });
+    const ok = await gcitConfirm({
+        title: "Delete user?",
+        message: "All their data will be permanently removed.",
+        confirmText: "Delete",
+        danger: true,
+    });
     if (!ok) return;
     try {
         const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
-        if (res.ok) { gcitToast("User deleted.", "info"); loadUsersWithStats(); }
+        if (res.ok) { gcitToast("User deleted.", "info"); loadUsers(); }
         else gcitToast("Failed to delete user", "error");
     } catch { gcitToast("Server error", "error"); }
 }
+
+/* ── Init ── */
+document.addEventListener("DOMContentLoaded", () => {
+    loadUsers();
+    loadBookings();
+});
 </script>
 </body>
 </html>
