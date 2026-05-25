@@ -10,282 +10,179 @@
 
         /* ── Schedule Header ── */
         .schedule-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
+            display: flex; justify-content: space-between;
+            align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
         }
         .schedule-title {
             font-family: 'DM Serif Display', serif;
-            font-size: 1.15rem;
-            font-weight: 400;
-            color: var(--green-dark);
+            font-size: 1.15rem; font-weight: 400; color: var(--green-dark);
         }
-        .schedule-date-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .schedule-date-row { display: flex; align-items: center; gap: 8px; }
         .schedule-date-row input[type="date"] {
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 7px 12px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            background: var(--surface);
-            color: var(--text);
-            outline: none;
-            cursor: pointer;
+            border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+            padding: 7px 12px; font-family: inherit; font-size: 14px; font-weight: 600;
+            background: var(--surface); color: var(--text); outline: none; cursor: pointer;
         }
         .schedule-date-row input[type="date"]:focus { border-color: var(--green-mid); }
         .btn-refresh-sched {
-            background: var(--green-bg);
-            border: 1px solid var(--border);
-            color: var(--green-mid);
-            padding: 7px 13px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 12px;
-            font-weight: 600;
+            background: var(--green-bg); border: 1px solid var(--border); color: var(--green-mid);
+            padding: 7px 13px; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: inherit; font-size: 12px; font-weight: 600;
         }
         .btn-refresh-sched:hover { background: var(--green-pale); }
 
         /* ── Legend ── */
-        .sched-legend {
-            display: flex;
-            gap: 14px;
-            margin-bottom: 14px;
-            flex-wrap: wrap;
-        }
+        .sched-legend { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
         .sched-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+            display: flex; align-items: center; gap: 5px;
+            font-size: 11px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.4px;
         }
-        .sched-legend-dot {
-            width: 10px; height: 10px;
-            border-radius: 3px; flex-shrink: 0;
-        }
+        .sched-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
         .sched-legend-dot.free    { background: var(--green-pale); border: 1px solid var(--green-light); }
         .sched-legend-dot.booked  { background: #e63946; }
         .sched-legend-dot.pending { background: #f4a261; }
 
-        /* ── Day Schedule Table ── */
+        /* ── Day Schedule ── */
         .day-schedule {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
         }
+
+        /* Hour group: wraps the :00 row + the collapsible :30 row */
+        .hour-group { display: contents; } /* no visual box, just logical grouping */
 
         .sched-row {
-            display: grid;
-            grid-template-columns: 56px 1fr;
+            display: grid; grid-template-columns: 56px 1fr;
             border-bottom: 1px solid var(--border);
-            transition: background var(--transition);
         }
-        .sched-row:last-child { border-bottom: none; }
+        .day-schedule > .sched-row:last-child,
+        .day-schedule > .inline-form-row:last-child { border-bottom: none; }
+
+        /* :30 half-rows are hidden; revealed when hovering the parent hour-group */
+        .half-row {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            border-bottom: none !important;
+            transition: max-height 0.18s ease, opacity 0.15s ease;
+        }
+        /* Use JS class toggling via mouseenter/mouseleave on the :00 row instead of CSS :hover
+           so we can also reveal when the half-row itself is hovered */
+        .half-row.revealed {
+            max-height: 52px;
+            opacity: 1;
+            border-bottom: 1px solid var(--border) !important;
+        }
 
         .sched-time {
-            padding: 10px 8px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-align: right;
-            border-right: 1px solid var(--border);
-            background: var(--green-bg);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
+            padding: 10px 8px; font-size: 11px; font-weight: 700; color: var(--text-muted);
+            text-align: right; border-right: 1px solid var(--border);
+            background: var(--green-bg); white-space: nowrap;
+            display: flex; align-items: center; justify-content: flex-end;
             min-height: 44px;
         }
 
         /* Free row */
         .sched-slot-free {
-            display: flex;
-            align-items: center;
-            padding: 10px 14px;
-            font-size: 13px;
-            color: var(--text-muted);
-            cursor: pointer;
-            gap: 8px;
-            min-height: 44px;
+            display: flex; align-items: center; padding: 10px 14px;
+            font-size: 13px; color: var(--text-muted); cursor: pointer;
+            gap: 8px; min-height: 44px;
         }
-        .sched-slot-free:hover {
-            background: var(--green-pale);
-            color: var(--green-dark);
-        }
+        .sched-slot-free:hover { background: var(--green-pale); color: var(--green-dark); }
         .sched-slot-free .free-icon {
-            width: 8px; height: 8px;
-            background: var(--green-pale);
-            border: 1.5px solid var(--green-light);
-            border-radius: 50%;
-            flex-shrink: 0;
+            width: 8px; height: 8px; background: var(--green-pale);
+            border: 1.5px solid var(--green-light); border-radius: 50%; flex-shrink: 0;
         }
-        .sched-slot-free:hover .free-icon {
-            background: var(--green-light);
-            border-color: var(--green-mid);
-        }
+        .sched-slot-free:hover .free-icon { background: var(--green-light); border-color: var(--green-mid); }
         .sched-slot-free .free-label { font-weight: 500; }
         .sched-slot-free .free-cta {
-            margin-left: auto;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--green-mid);
-            opacity: 0;
-            transition: opacity var(--transition);
-            white-space: nowrap;
+            margin-left: auto; font-size: 11px; font-weight: 700; color: var(--green-mid);
+            opacity: 0; transition: opacity var(--transition); white-space: nowrap;
         }
         .sched-slot-free:hover .free-cta { opacity: 1; }
 
-        /* Booked band — spans multiple rows via JS, uses absolute positioning trick */
+        /* Past row */
+        .sched-slot-past {
+            display: flex; align-items: center; padding: 10px 14px;
+            font-size: 12px; color: var(--text-muted); min-height: 44px; opacity: 0.45;
+        }
+        .sched-row-past .sched-time { opacity: 0.45; }
+
+        /* Booked row — single compact row per booking */
         .sched-slot-booked {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 10px 14px;
-            min-height: 44px;
-            gap: 2px;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 10px 14px; min-height: 44px; gap: 2px;
         }
         .sched-slot-booked.status-approved {
-            background: linear-gradient(135deg, #fde8e8 0%, #fce4e4 100%);
+            background: linear-gradient(135deg, #fde8e8, #fce4e4);
             border-left: 3px solid #e63946;
         }
         .sched-slot-booked.status-pending {
-            background: linear-gradient(135deg, #fff3e0 0%, #fef0d8 100%);
+            background: linear-gradient(135deg, #fff3e0, #fef0d8);
             border-left: 3px solid #f4a261;
         }
         .sched-slot-booked.status-cancel_requested {
-            background: linear-gradient(135deg, #fde8e8 0%, #fce4e4 100%);
+            background: linear-gradient(135deg, #fde8e8, #fce4e4);
             border-left: 3px dashed #e63946;
             opacity: 0.8;
         }
-        .booked-who {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--green-dark);
-        }
-        .booked-meta {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
+        .booked-who  { font-size: 12px; font-weight: 700; color: var(--green-dark); }
+        .booked-meta { font-size: 11px; color: var(--text-muted); }
         .booked-status-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 20px;
-            margin-top: 3px;
-            width: fit-content;
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 10px; font-weight: 700; padding: 2px 7px;
+            border-radius: 20px; margin-top: 3px; width: fit-content;
         }
-        .chip-approved  { background: #fde8e8; color: #8b1a1a; border: 1px solid #f5c6c6; }
-        .chip-pending   { background: #fff3e0; color: #7d4000; border: 1px solid #ffc896; }
-        .chip-cancel_requested { background: #f0f0f0; color: #555; border: 1px solid #ddd; }
+        .chip-approved         { background: #fde8e8; color: #8b1a1a; border: 1px solid #f5c6c6; }
+        .chip-pending          { background: #fff3e0; color: #7d4000; border: 1px solid #ffc896; }
+        .chip-cancel_requested { background: #f0f0f0; color: #555;    border: 1px solid #ddd; }
+
+        /* time cell for a booking row shows start→end stacked */
+        .sched-time-range { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+        .sched-time-range .t-end { font-size: 9px; opacity: 0.6; font-weight: 600; }
 
         /* ── Inline Booking Form ── */
         .inline-form-row {
-            display: grid;
-            grid-template-columns: 56px 1fr;
-            border-bottom: 1px solid var(--border);
-            background: var(--green-bg);
+            display: grid; grid-template-columns: 56px 1fr;
+            border-bottom: 1px solid var(--border); background: var(--green-bg);
         }
-        .inline-form-row:last-child { border-bottom: none; }
-        .inline-form-gutter {
-            border-right: 1px solid var(--border);
-            background: var(--green-bg);
-        }
-        .inline-form-panel {
-            padding: 16px;
-            animation: formSlide 0.2s ease;
-        }
+        .inline-form-gutter { border-right: 1px solid var(--border); background: var(--green-bg); }
+        .inline-form-panel { padding: 16px; animation: formSlide 0.2s ease; }
         @keyframes formSlide {
             from { opacity: 0; transform: translateY(-6px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-
         .inline-form-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1rem;
-            font-weight: 400;
-            color: var(--green-dark);
-            margin-bottom: 12px;
+            font-family: 'DM Serif Display', serif; font-size: 1rem;
+            font-weight: 400; color: var(--green-dark); margin-bottom: 12px;
         }
         .inline-form-notice {
-            background: #fffbea;
-            border: 1px solid #ffd966;
-            border-radius: var(--radius-xs);
-            padding: 8px 11px;
-            font-size: 11px;
-            color: #7d5a00;
-            font-weight: 500;
-            margin-bottom: 14px;
-            line-height: 1.5;
+            background: #fffbea; border: 1px solid #ffd966; border-radius: var(--radius-xs);
+            padding: 8px 11px; font-size: 11px; color: #7d5a00;
+            font-weight: 500; margin-bottom: 14px; line-height: 1.5;
         }
         .inline-form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;
         }
-        @media (max-width: 480px) {
-            .inline-form-grid { grid-template-columns: 1fr; }
-        }
-        .inline-form-row-full { margin-bottom: 10px; }
-        .inline-form-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 14px;
-        }
+        @media (max-width: 480px) { .inline-form-grid { grid-template-columns: 1fr; } }
+        .inline-form-actions { display: flex; gap: 8px; margin-top: 14px; }
         .btn-inline-submit {
-            flex: 1;
-            background: var(--green-mid);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            padding: 10px 16px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background var(--transition);
+            flex: 1; background: var(--green-mid); color: white; border: none;
+            border-radius: var(--radius-sm); padding: 10px 16px; font-family: inherit;
+            font-size: 14px; font-weight: 700; cursor: pointer; transition: background var(--transition);
         }
         .btn-inline-submit:hover { background: var(--green-dark); }
         .btn-inline-cancel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            border-radius: var(--radius-sm);
-            padding: 10px 16px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
+            background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+            border-radius: var(--radius-sm); padding: 10px 16px; font-family: inherit;
+            font-size: 14px; font-weight: 600; cursor: pointer;
         }
         .btn-inline-cancel:hover { background: var(--green-bg); }
-
-        .inline-duration-hint {
-            font-size: 11px;
-            margin-top: 4px;
-        }
+        .inline-duration-hint { font-size: 11px; margin-top: 4px; }
 
         .sched-loading {
-            padding: 40px 20px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
+            padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px;
         }
     </style>
 </head>
@@ -359,9 +256,9 @@ requireAuth();
 const _schedUser = JSON.parse(localStorage.getItem("user") || "{}");
 const SCHED_START = 6;
 const SCHED_END   = 22;
-const SLOT_STEP   = 30; // minutes
+const SLOT_STEP   = 30;
 
-let _openFormSlot = null; // currently open inline form slot key "HH:MM"
+let _openFormSlot = null;
 
 function logout() {
     localStorage.removeItem("user");
@@ -369,148 +266,194 @@ function logout() {
 }
 function toggleNav() { document.getElementById('mainNav').classList.toggle('open'); }
 
-/* ── helpers ── */
+/* ── Helpers ── */
 
 function slotKey(h, m) {
     return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
 }
-
 function toMinutes(timeStr) {
     const [h, m] = timeStr.split(':').map(Number);
     return h * 60 + m;
 }
-
 function formatLabel(timeStr) {
     const [h, m] = timeStr.split(':').map(Number);
-    const period = h < 12 ? 'AM' : 'PM';
-    const h12    = h % 12 || 12;
-    return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+    return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h < 12 ? 'AM' : 'PM'}`;
 }
 
 /* ── Init ── */
 
 document.addEventListener("DOMContentLoaded", () => {
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('schedDate').value = today;
-    document.getElementById('schedDate').min   = today;
+    const el = document.getElementById('schedDate');
+    el.value = today;
+    el.min   = today;
     loadSchedule();
 });
 
-/* ── Load & Render ── */
+/* ── Load ── */
 
 async function loadSchedule() {
-    const date   = document.getElementById('schedDate').value;
-    const sched  = document.getElementById('daySchedule');
+    const date  = document.getElementById('schedDate').value;
+    const sched = document.getElementById('daySchedule');
     _openFormSlot = null;
-
     sched.innerHTML = '<div class="sched-loading"><i class="fas fa-circle-notch fa-spin" style="margin-right:8px;"></i>Loading…</div>';
 
-    let bookings = [];
     try {
-        const res = await fetch(`/bookings/date/${date}/all`);
+        // no-store so we always see the latest state (e.g. after a cancel)
+        const res  = await fetch(`/bookings/date/${date}/all`, { cache: 'no-store' });
         const data = await res.json();
-        bookings = Array.isArray(data) ? data : [];
+        renderSchedule(date, Array.isArray(data) ? data : []);
     } catch {
         sched.innerHTML = '<div class="sched-loading" style="color:var(--red);">Could not load schedule.</div>';
-        return;
     }
-
-    renderSchedule(date, bookings);
 }
+
+/* ── Render ── */
 
 function renderSchedule(date, bookings) {
     const sched = document.getElementById('daySchedule');
     sched.innerHTML = '';
 
-    // Build all 30-min slots
-    const slots = [];
-    for (let h = SCHED_START; h < SCHED_END; h++) {
-        for (let m = 0; m < 60; m += SLOT_STEP) {
-            const start = slotKey(h, m);
-            const endM  = h * 60 + m + SLOT_STEP;
-            const end   = slotKey(Math.floor(endM / 60), endM % 60);
-            slots.push({ start, end });
+    const now     = new Date();
+    const isToday = date === now.toISOString().split('T')[0];
+    const nowM    = isToday ? (now.getHours() * 60 + now.getMinutes()) : -1;
+
+    // Sort bookings by start time; ignore 'cancelled' (shouldn't come from API but guard anyway)
+    const sorted = [...bookings]
+        .filter(b => b.status !== 'cancelled')
+        .sort((a, b) => toMinutes(a.starting_time) - toMinutes(b.starting_time));
+
+    let curM = SCHED_START * 60;
+    const endM = SCHED_END * 60;
+
+    function appendFreeBlock(fromM, toM) {
+        // Build :00/:30 pairs; :30 is hidden until its :00 sibling is hovered
+        let m = fromM;
+        while (m < toM) {
+            const isPast  = m < nowM;
+            const start   = slotKey(Math.floor(m / 60), m % 60);
+            const nextM   = m + SLOT_STEP;
+            const end     = slotKey(Math.floor(nextM / 60), nextM % 60);
+            const isHalf  = (m % 60) !== 0;
+
+            const row = createFreeRow(start, end, isPast, date);
+
+            if (isHalf) {
+                // standalone :30 (e.g. free gap starts mid-hour after a booking ends at :30)
+                row.classList.add('half-row');
+                // find preceding :00 row to wire hover
+                const prev = sched.lastElementChild;
+                if (prev) wireHalfReveal(prev, row);
+                sched.appendChild(row);
+            } else {
+                // :00 row — check if the :30 is also in this free block
+                sched.appendChild(row);
+                const halfM = m + SLOT_STEP;
+                if (halfM < toM) {
+                    const halfIsPast = halfM < nowM;
+                    const halfStart  = slotKey(Math.floor(halfM / 60), halfM % 60);
+                    const halfEnd    = slotKey(Math.floor((halfM + SLOT_STEP) / 60), (halfM + SLOT_STEP) % 60);
+                    const halfRow    = createFreeRow(halfStart, halfEnd, halfIsPast, date);
+                    halfRow.classList.add('half-row');
+                    wireHalfReveal(row, halfRow);
+                    sched.appendChild(halfRow);
+                    m += SLOT_STEP; // skip the :30 (already added)
+                }
+            }
+            m += SLOT_STEP;
         }
     }
 
-    // Map bookings to their covering slots
-    // A booking covers a slot if booking.start < slot.end AND booking.end > slot.start
-    const slotBooking = {}; // slot.start → booking or null
-    const bookingFirstSlot = {}; // bookingId → first slot it covers
+    for (const booking of sorted) {
+        const bStartM = toMinutes(booking.starting_time);
+        const bEndM   = toMinutes(booking.ending_time);
 
-    slots.forEach(slot => {
-        const slotStartM = toMinutes(slot.start);
-        const slotEndM   = toMinutes(slot.end);
-        const match = bookings.find(b => {
-            const bsM = toMinutes(b.starting_time);
-            const beM = toMinutes(b.ending_time);
-            return bsM < slotEndM && beM > slotStartM;
-        });
-        slotBooking[slot.start] = match || null;
-        if (match && bookingFirstSlot[match.id] === undefined) {
-            bookingFirstSlot[match.id] = slot.start;
-        }
-    });
+        if (bStartM > curM) appendFreeBlock(curM, bStartM);
 
-    slots.forEach(slot => {
-        const booking = slotBooking[slot.start];
-
+        // Single compact row for the entire booking
         const row = document.createElement('div');
         row.className = 'sched-row';
-        row.dataset.slot = slot.start;
 
         const timeCell = document.createElement('div');
         timeCell.className = 'sched-time';
-        timeCell.textContent = formatLabel(slot.start);
+        timeCell.innerHTML = `<div class="sched-time-range">
+            <span>${formatLabel(booking.starting_time)}</span>
+            <span class="t-end">→ ${formatLabel(booking.ending_time)}</span>
+        </div>`;
         row.appendChild(timeCell);
 
-        const contentCell = document.createElement('div');
-
-        if (!booking) {
-            // Free slot
-            contentCell.className = 'sched-slot-free';
-            contentCell.innerHTML = `
-                <div class="free-icon"></div>
-                <span class="free-label">Available</span>
-                <span class="free-cta"><i class="fas fa-plus-circle"></i> Book this slot</span>`;
-            contentCell.addEventListener('click', () => toggleInlineForm(slot.start, slot.end, date, row));
-        } else {
-            // Booked slot
-            const isFirst = bookingFirstSlot[booking.id] === slot.start;
-            contentCell.className = `sched-slot-booked status-${booking.status}`;
-
-            if (isFirst) {
-                // Show info on the first row of the booking band
-                const chipClass = `chip-${booking.status}`;
-                const chipLabel =
-                    booking.status === 'approved'          ? '<i class="fas fa-check-circle"></i> Approved' :
-                    booking.status === 'pending'           ? '<i class="fas fa-clock"></i> Pending' :
-                    booking.status === 'cancel_requested'  ? '<i class="fas fa-hourglass-half"></i> Cancel requested' :
-                    booking.status;
-
-                contentCell.innerHTML = `
-                    <div class="booked-who">${booking.student_id}</div>
-                    <div class="booked-meta">${booking.match_type || '—'} &nbsp;·&nbsp; ${booking.starting_time} – ${booking.ending_time}</div>
-                    <span class="booked-status-chip ${chipClass}">${chipLabel}</span>`;
-            }
-            // subsequent rows in the band are blank (same color band continues)
-        }
-
-        row.appendChild(contentCell);
+        const content = document.createElement('div');
+        content.className = `sched-slot-booked status-${booking.status}`;
+        const chipLabel =
+            booking.status === 'approved'        ? '<i class="fas fa-check-circle"></i> Approved' :
+            booking.status === 'pending'          ? '<i class="fas fa-clock"></i> Pending' :
+            booking.status === 'cancel_requested' ? '<i class="fas fa-hourglass-half"></i> Cancel requested' :
+            booking.status;
+        content.innerHTML = `
+            <div class="booked-who">${booking.student_id}</div>
+            <div class="booked-meta">${booking.match_type || '—'} &nbsp;·&nbsp; ${booking.starting_time}–${booking.ending_time}</div>
+            <span class="booked-status-chip chip-${booking.status}">${chipLabel}</span>`;
+        row.appendChild(content);
         sched.appendChild(row);
-    });
+
+        curM = bEndM;
+    }
+
+    if (curM < endM) appendFreeBlock(curM, endM);
+}
+
+function createFreeRow(startTime, endTime, isPast, date) {
+    const row = document.createElement('div');
+    row.className = 'sched-row' + (isPast ? ' sched-row-past' : '');
+    row.dataset.slot = startTime;
+
+    const timeCell = document.createElement('div');
+    timeCell.className = 'sched-time';
+    timeCell.textContent = formatLabel(startTime);
+    row.appendChild(timeCell);
+
+    const content = document.createElement('div');
+    if (isPast) {
+        content.className = 'sched-slot-past';
+        content.innerHTML = `<span>—</span>`;
+    } else {
+        content.className = 'sched-slot-free';
+        content.innerHTML = `
+            <div class="free-icon"></div>
+            <span class="free-label">Available</span>
+            <span class="free-cta"><i class="fas fa-plus-circle"></i> Book</span>`;
+        content.addEventListener('click', () => toggleInlineForm(startTime, endTime, date, row));
+    }
+    row.appendChild(content);
+    return row;
+}
+
+function wireHalfReveal(hourRow, halfRow) {
+    // Show :30 when hovering either the :00 row or the :30 row itself
+    const show = () => halfRow.classList.add('revealed');
+    const hide = () => {
+        // Only hide if neither the :00 nor :30 row is being hovered
+        setTimeout(() => {
+            if (!hourRow.matches(':hover') && !halfRow.matches(':hover')) {
+                halfRow.classList.remove('revealed');
+            }
+        }, 60);
+    };
+    hourRow.addEventListener('mouseenter', show);
+    hourRow.addEventListener('mouseleave', hide);
+    halfRow.addEventListener('mouseenter', show);
+    halfRow.addEventListener('mouseleave', hide);
 }
 
 /* ── Inline Form ── */
 
-function toggleInlineForm(startTime, endTime, date, afterRow) {
-    // Close existing open form
+function toggleInlineForm(startTime, endTime, date, row) {
     const existing = document.getElementById('inlineFormRow');
     if (existing) {
-        const wasSlot = existing.dataset.forSlot;
+        const was = existing.dataset.forSlot;
         existing.remove();
         _openFormSlot = null;
-        if (wasSlot === startTime) return; // clicked same slot again → just close
+        if (was === startTime) return; // toggled closed
     }
 
     _openFormSlot = startTime;
@@ -519,33 +462,23 @@ function toggleInlineForm(startTime, endTime, date, afterRow) {
     formRow.className = 'inline-form-row';
     formRow.id = 'inlineFormRow';
     formRow.dataset.forSlot = startTime;
+    formRow.innerHTML = `<div class="inline-form-gutter"></div><div class="inline-form-panel" id="inlinePanel"></div>`;
 
-    const gutter = document.createElement('div');
-    gutter.className = 'inline-form-gutter';
+    // Insert after the row (if it's a .half-row it may be directly in .day-schedule)
+    row.insertAdjacentElement('afterend', formRow);
+    document.getElementById('inlinePanel').innerHTML = buildInlineFormHTML(startTime, date);
 
-    const panel = document.createElement('div');
-    panel.className = 'inline-form-panel';
-    panel.innerHTML = buildInlineFormHTML(startTime, date);
-
-    formRow.appendChild(gutter);
-    formRow.appendChild(panel);
-
-    afterRow.insertAdjacentElement('afterend', formRow);
     formRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-    // Populate end time options after inserting into DOM (also sets 90-min default)
     populateEndTimes(startTime);
 
-    // Wire duration hint on change
-    const endSel = panel.querySelector('#inlineEndTime');
-    if (endSel) endSel.addEventListener('change', updateDurationHint);
+    document.getElementById('inlineEndTime')?.addEventListener('change', updateDurationHint);
 }
 
 function buildInlineFormHTML(startTime, date) {
     return `
         <div class="inline-form-title">New Booking Request</div>
         <div class="inline-form-notice">
-            <i class="fas fa-hourglass-half"></i>&nbsp; Bookings need admin approval. Max <strong>1.5 hours</strong>.
+            <i class="fas fa-hourglass-half"></i>&nbsp; Requires admin approval · Max <strong>1.5 hours</strong>
         </div>
         <div class="inline-form-grid">
             <div class="form-group" style="margin:0;">
@@ -573,11 +506,9 @@ function buildInlineFormHTML(startTime, date) {
                 <div class="inline-duration-hint" id="inlineDurationHint"></div>
             </div>
         </div>
-        <div class="inline-form-row-full">
-            <div class="form-group" style="margin:0;">
-                <label>Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
-                <textarea id="inlineNotes" placeholder="Any additional info…" style="font-size:14px;"></textarea>
-            </div>
+        <div class="form-group" style="margin:0 0 10px;">
+            <label>Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            <textarea id="inlineNotes" placeholder="Any additional info…" style="font-size:14px;"></textarea>
         </div>
         <div class="inline-form-actions">
             <button class="btn-inline-submit" onclick="submitInlineBooking()">Submit Request</button>
@@ -595,10 +526,9 @@ function populateEndTimes(startTime) {
         const h = Math.floor(endM / 60);
         const m = endM % 60;
         if (h > SCHED_END) break;
-        const val = slotKey(h, m);
-        sel.add(new Option(formatLabel(val), val));
+        sel.add(new Option(formatLabel(slotKey(h, m)), slotKey(h, m)));
     }
-    // default to 90 min (last option)
+    // Default to 90 min (last/max option)
     sel.selectedIndex = sel.options.length - 1;
     updateDurationHint();
 }
@@ -623,8 +553,7 @@ function updateDurationHint() {
 }
 
 function closeInlineForm() {
-    const f = document.getElementById('inlineFormRow');
-    if (f) f.remove();
+    document.getElementById('inlineFormRow')?.remove();
     _openFormSlot = null;
 }
 
@@ -644,13 +573,18 @@ async function submitInlineBooking() {
     }
 
     const mins = toMinutes(data.ending_time) - toMinutes(data.starting_time);
-    if (mins <= 0) {
-        gcitToast('End time must be after start time.', 'error');
-        return;
-    }
-    if (mins > 90) {
-        gcitToast('Bookings cannot exceed 1.5 hours.', 'error');
-        return;
+    if (mins <= 0) { gcitToast('End time must be after start time.', 'error'); return; }
+    if (mins > 90) { gcitToast('Bookings cannot exceed 1.5 hours.', 'error'); return; }
+
+    // Prevent booking past time slots for today
+    const today = new Date().toISOString().split('T')[0];
+    if (data.date === today) {
+        const now  = new Date();
+        const nowM = now.getHours() * 60 + now.getMinutes();
+        if (toMinutes(data.starting_time) < nowM) {
+            gcitToast('This time slot has already passed.', 'error');
+            return;
+        }
     }
 
     try {
@@ -661,7 +595,6 @@ async function submitInlineBooking() {
         });
         const result = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(result.error || 'Booking failed');
-
         gcitToast('Booking request submitted — pending admin approval.');
         closeInlineForm();
         loadSchedule();
