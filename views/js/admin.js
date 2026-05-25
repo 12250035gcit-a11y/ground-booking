@@ -36,8 +36,8 @@ function showError(msg) {
     if (el) {
         el.textContent = msg;
         el.style.display = "block";
-    } else {
-        alert(msg);
+    } else if (typeof gcitToast === "function") {
+        gcitToast(msg, "error");
     }
 }
 
@@ -81,13 +81,16 @@ function renderUsers(users) {
 }
 
 async function deleteUser(id) {
-    if (!confirm("Delete this user? This cannot be undone.")) return;
+    const ok = typeof gcitConfirm === "function"
+        ? await gcitConfirm({ title: "Delete user?", message: "All their data will be permanently removed.", confirmText: "Delete", danger: true })
+        : confirm("Delete this user? This cannot be undone.");
+    if (!ok) return;
     try {
         const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
-        if (res.ok) loadUsersWithStats();
-        else alert("Failed to delete user");
+        if (res.ok) { if (typeof gcitToast === "function") gcitToast("User deleted.", "info"); loadUsersWithStats(); }
+        else if (typeof gcitToast === "function") gcitToast("Failed to delete user", "error");
     } catch {
-        alert("Server error");
+        if (typeof gcitToast === "function") gcitToast("Server error", "error");
     }
 }
 
@@ -128,12 +131,15 @@ function renderAdminBookings(bookings) {
 }
 
 async function deleteAdminBooking(id) {
-    if (!confirm("Delete this booking?")) return;
+    const ok = typeof gcitConfirm === "function"
+        ? await gcitConfirm({ title: "Delete booking?", message: "This action cannot be undone.", confirmText: "Delete", danger: true })
+        : confirm("Delete this booking?");
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}`, { method: "DELETE" });
         if (res.ok) loadAdminBookings();
     } catch {
-        alert("Failed to delete booking");
+        if (typeof gcitToast === "function") gcitToast("Failed to delete booking", "error");
     }
 }
 

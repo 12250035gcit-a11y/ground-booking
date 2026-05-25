@@ -160,6 +160,7 @@
 </nav>
 
 <script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
 <script>
 let _currentUser = {};
 
@@ -244,23 +245,30 @@ async function loadMyBookings() {
 }
 
 async function deleteMyBooking(id) {
-    if (!confirm("Delete this booking request?")) return;
+    const ok = await gcitConfirm({ title: "Delete booking?", message: "This request will be permanently removed.", confirmText: "Delete", danger: true });
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Delete failed");
+        gcitToast("Booking removed.");
         loadMyBookings();
-    } catch (err) { alert(err.message); }
+    } catch (err) { gcitToast(err.message, "error"); }
 }
 
 async function requestCancel(id) {
-    if (!confirm("Request cancellation of this approved booking?\n\nAn admin will confirm and free the slot.")) return;
+    const ok = await gcitConfirm({
+        title: "Request cancellation?",
+        message: "An admin will review and confirm. The slot will be freed once approved.",
+        confirmText: "Send Request",
+    });
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/request-cancel`, { method: "PUT" });
         const result = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(result.error || "Request failed");
-        alert("Cancellation request submitted. Admin will confirm shortly.");
+        gcitToast("Cancellation request sent.");
         loadMyBookings();
-    } catch (err) { alert("❌ " + err.message); }
+    } catch (err) { gcitToast(err.message, "error"); }
 }
 
 function AddDetails() {
@@ -275,9 +283,9 @@ function AddDetails() {
         phone: parseInt(phoneEl.value)
     };
 
-    if (!data.email)      { alert("Enter Email"); return; }
-    if (!data.department) { alert("Enter Department"); return; }
-    if (isNaN(data.phone)) { alert("Enter valid phone number"); return; }
+    if (!data.email)       { gcitToast("Please enter your email.", "error"); return; }
+    if (!data.department)  { gcitToast("Please enter your department.", "error"); return; }
+    if (isNaN(data.phone)) { gcitToast("Please enter a valid phone number.", "error"); return; }
 
     fetch("/add/details", {
         method: "POST",
@@ -290,14 +298,14 @@ function AddDetails() {
         return result;
     })
     .then(() => {
-        alert("Details saved!");
+        gcitToast("Details saved!");
         emailEl.disabled = true;
         deptEl.disabled  = true;
         phoneEl.disabled = true;
         btn.textContent  = "Edit";
         btn.onclick      = enableEdit;
     })
-    .catch(err => alert("Error: " + err.message));
+    .catch(err => gcitToast("Error: " + err.message, "error"));
 }
 
 function enableEdit() {
