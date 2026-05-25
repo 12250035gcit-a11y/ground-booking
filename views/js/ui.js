@@ -4,12 +4,15 @@
 
 // ── Toast ─────────────────────────────────────────────────────────
 
-const _toastContainer = (() => {
-    const el = document.createElement("div");
-    el.id = "gcit-toasts";
-    document.body.appendChild(el);
+function _getToastContainer() {
+    let el = document.getElementById("gcit-toasts");
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "gcit-toasts";
+        (document.body || document.documentElement).appendChild(el);
+    }
     return el;
-})();
+}
 
 function gcitToast(message, type = "success", duration = 3800) {
     const themes = {
@@ -19,15 +22,18 @@ function gcitToast(message, type = "success", duration = 3800) {
     };
     const t = themes[type] || themes.success;
 
+    const container = _getToastContainer();
     const el = document.createElement("div");
     el.className = "gcit-toast";
     el.style.cssText = `background:${t.bg};border:1px solid ${t.border};color:${t.color};`;
     el.innerHTML = `<span class="gcit-toast-icon">${t.icon}</span><span>${message}</span>`;
     el.addEventListener("click", () => _dismissToast(el));
-    _toastContainer.appendChild(el);
+    container.appendChild(el);
 
-    // trigger enter animation
-    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("gcit-toast--in")));
+    // force a reflow so the browser registers the initial hidden state,
+    // then add the --in class to trigger the CSS transition
+    void el.offsetHeight;
+    el.classList.add("gcit-toast--in");
 
     const timer = setTimeout(() => _dismissToast(el), duration);
     el._gcitTimer = timer;
@@ -50,9 +56,7 @@ function gcitConfirm({ title = "Are you sure?", message = "", confirmText = "Con
         const card = document.createElement("div");
         card.className = "gcit-dialog";
 
-        const accentColor    = danger ? "#e63946" : "#2d6a4f";
-        const accentHover    = danger ? "#c1121f" : "#1a3a2a";
-        const confirmBtnCls  = danger ? "gcit-btn-danger" : "gcit-btn-confirm";
+        const confirmBtnCls = danger ? "gcit-btn-danger" : "gcit-btn-confirm";
 
         card.innerHTML = `
             <p class="gcit-dialog-title">${title}</p>
@@ -66,11 +70,10 @@ function gcitConfirm({ title = "Are you sure?", message = "", confirmText = "Con
         document.body.appendChild(overlay);
         document.body.style.overflow = "hidden";
 
-        // trigger enter animation
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-            overlay.classList.add("gcit-overlay--in");
-            card.classList.add("gcit-dialog--in");
-        }));
+        // force reflow then animate in
+        void overlay.offsetHeight;
+        overlay.classList.add("gcit-overlay--in");
+        card.classList.add("gcit-dialog--in");
 
         function close(result) {
             document.body.style.overflow = "";
