@@ -5,6 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile – GCIT Ground Booking</title>
     <link rel="stylesheet" href="css/home.css">
+    <style>
+        .badge-cancel    { background: #fff0e0; color: #7d4000; }
+        .badge-cancelled { background: #f0f0f0; color: #555; }
+
+        .my-bookings-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-top: 24px;
+        }
+        .my-bookings-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 18px; border-bottom: 1px solid var(--border);
+            background: var(--green-bg); gap: 10px; flex-wrap: wrap;
+        }
+        .my-bookings-header h3 { font-family: 'DM Serif Display', serif; font-size: 1rem; font-weight: 400; color: var(--green-dark); margin: 0; }
+        .btn-refresh-sm {
+            background: var(--surface); border: 1px solid var(--border); color: var(--green-mid);
+            padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: inherit; font-size: 12px; font-weight: 600;
+        }
+        .btn-refresh-sm:hover { background: var(--green-pale); }
+        .bookings-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .bookings-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+        .bookings-table th {
+            text-align: left; font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.6px;
+            color: var(--text-muted); padding: 10px 14px;
+            background: var(--green-bg); border-bottom: 1px solid var(--border); white-space: nowrap;
+        }
+        .bookings-table td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .bookings-table tr:last-child td { border-bottom: none; }
+        .bookings-table tbody tr:hover td { background: var(--green-bg); }
+
+        .cancel-req-btn {
+            background: #fff3e0; border: 1px solid #ffc896; color: #7d4000;
+            padding: 5px 10px; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: inherit; font-size: 11px; font-weight: 600; white-space: nowrap;
+        }
+        .cancel-req-btn:hover { background: #ffe0b2; }
+    </style>
 </head>
 <body>
 
@@ -20,7 +62,6 @@
         <ul>
             <li><a href="home.html">Home</a></li>
             <li><a href="about.html">Available Ground</a></li>
-            <li><a href="booking.html">Booking</a></li>
             <li><a href="profile.html" class="active-link">Profile</a></li>
         </ul>
     </nav>
@@ -66,30 +107,35 @@
             <div class="stats-grid">
                 <div class="stat-box">
                     <span class="stat-number" id="totalBookings">0</span>
-                    <span class="stat-label">Total Bookings</span>
+                    <span class="stat-label">My Bookings</span>
                 </div>
                 <div class="stat-box">
-                    <span class="stat-number">–</span>
+                    <span class="stat-number" id="upcomingBookings">–</span>
                     <span class="stat-label">Upcoming</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="history-section">
-        <h3 class="card-subtitle">Recent Booking History</h3>
-        <div class="table-responsive">
-            <table class="history-table">
+    <!-- My Bookings Management -->
+    <div class="my-bookings-section">
+        <div class="my-bookings-header">
+            <h3>My Bookings</h3>
+            <button class="btn-refresh-sm" onclick="loadMyBookings()">↻ Refresh</button>
+        </div>
+        <div class="bookings-scroll">
+            <table class="bookings-table">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Time Slot</th>
                         <th>Type</th>
+                        <th>Date</th>
+                        <th>Time</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="historyBody">
-                    <tr><td colspan="4" style="text-align:center;padding:16px;">Loading...</td></tr>
+                <tbody id="myBookingsList">
+                    <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -110,83 +156,118 @@
 <nav class="bottom-dock">
     <a href="home.html" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
     <a href="about.html" class="dock-item"><i class="fas fa-futbol"></i><span>Ground</span></a>
-    <a href="booking.html" class="dock-item"><i class="fas fa-calendar-plus"></i><span>Book</span></a>
     <a href="profile.html" class="dock-item active"><i class="fas fa-user"></i><span>Profile</span></a>
 </nav>
 
 <script src="js/auth.js"></script>
 <script>
+let _currentUser = {};
+
 function logout() {
     localStorage.removeItem("user");
-    fetch("/user/logout", { method: "POST" }).finally(() => {
-        window.location.href = "index.html";
-    });
+    fetch("/user/logout", { method: "POST" }).finally(() => { window.location.href = "index.html"; });
 }
-
-function toggleNav() {
-    document.getElementById('mainNav').classList.toggle('open');
-}
+function toggleNav() { document.getElementById('mainNav').classList.toggle('open'); }
 
 function populateProfile(user) {
     if (!user || !user.first_name) return;
+    _currentUser = user;
     const fullName = user.first_name + " " + (user.last_name || "");
     document.getElementById("userName").textContent = fullName.trim();
     document.getElementById("userEmail").textContent = user.email || "—";
     const initials = (user.first_name[0] || "").toUpperCase() + (user.last_name ? user.last_name[0].toUpperCase() : "");
     document.getElementById("profileAvatar").textContent = initials || "?";
-
     const emailEl = document.getElementById("email");
     emailEl.value = user.email || "";
     emailEl.readOnly = true;
     emailEl.style.background = "var(--green-bg)";
     emailEl.style.cursor = "default";
     if (user.phone) document.getElementById("phone").value = user.phone;
+    loadMyBookings();
 }
 
 requireAuth(populateProfile);
 
-// Load bookings for history
-async function loadHistory() {
+function statusBadge(status) {
+    const map = {
+        pending:          { cls: 'status-pending',   label: '<i class="fas fa-clock"></i> Pending' },
+        approved:         { cls: 'status-approved',  label: '<i class="fas fa-check-circle"></i> Approved' },
+        rejected:         { cls: 'status-rejected',  label: '<i class="fas fa-times-circle"></i> Rejected' },
+        cancel_requested: { cls: 'badge-cancel',     label: '<i class="fas fa-hourglass-half"></i> Cancel Pending' },
+        cancelled:        { cls: 'badge-cancelled',  label: '<i class="fas fa-ban"></i> Cancelled' },
+    };
+    const s = map[status] || { cls: 'status-pending', label: status };
+    return `<span class="status-badge ${s.cls}">${s.label}</span>`;
+}
+
+async function loadMyBookings() {
+    const tbody = document.getElementById("myBookingsList");
     try {
         const res = await fetch("/bookings");
-        const bookings = await res.json();
-        const list = Array.isArray(bookings) ? bookings : [];
+        const all = await res.json();
+        const list = Array.isArray(all) ? all : [];
+        const mine = list.filter(b => b.student_id === _currentUser.email);
 
-        document.getElementById("totalBookings").textContent = list.length;
+        // Update stats
+        document.getElementById("totalBookings").textContent = mine.length;
+        const today = new Date().toISOString().split("T")[0];
+        const upcoming = mine.filter(b => b.status === "approved" && b.date >= today).length;
+        document.getElementById("upcomingBookings").textContent = upcoming || "–";
 
-        const tbody = document.getElementById("historyBody");
-        if (!list.length) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted);">No bookings yet</td></tr>`;
+        if (!mine.length) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No bookings yet. <a href="about.html" style="color:var(--green-mid);">Book the ground</a></td></tr>`;
             return;
         }
 
-        const badgeMap = {
-            pending:  { cls: 'status-pending',  label: 'Pending' },
-            approved: { cls: 'status-approved', label: 'Approved' },
-            rejected: { cls: 'status-rejected', label: 'Rejected' },
-        };
-
-        tbody.innerHTML = list.slice(0, 5).map(b => {
-            const badge = badgeMap[b.status] || { cls: 'status-pending', label: b.status };
+        tbody.innerHTML = mine.map(b => {
+            let action = `<span style="font-size:12px;color:var(--text-muted);">–</span>`;
+            if (b.status === "pending" || b.status === "rejected") {
+                action = `<button class="delete-btn" onclick="deleteMyBooking(${b.id})">Delete</button>`;
+            } else if (b.status === "approved") {
+                action = `<button class="cancel-req-btn" onclick="requestCancel(${b.id})">Request Cancel</button>`;
+            } else if (b.status === "cancel_requested") {
+                action = `<span style="font-size:11px;color:var(--text-muted);font-style:italic;">Awaiting admin</span>`;
+            }
             return `
             <tr>
+                <td>${b.match_type || "–"}</td>
                 <td>${b.date}</td>
-                <td>${b.starting_time} – ${b.ending_time}</td>
-                <td>${b.match_type || "—"}</td>
-                <td><span class="status-badge ${badge.cls}">${badge.label}</span></td>
+                <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
+                <td>${statusBadge(b.status)}</td>
+                <td>${action}</td>
             </tr>`;
         }).join('');
+
     } catch {
-        document.getElementById("historyBody").innerHTML =
-            `<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted);">Could not load history</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text-muted);">Could not load bookings</td></tr>`;
     }
+}
+
+async function deleteMyBooking(id) {
+    if (!confirm("Delete this booking request?")) return;
+    try {
+        const res = await fetch(`/booking/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Delete failed");
+        loadMyBookings();
+    } catch (err) { alert(err.message); }
+}
+
+async function requestCancel(id) {
+    if (!confirm("Request cancellation of this approved booking?\n\nAn admin will confirm and free the slot.")) return;
+    try {
+        const res = await fetch(`/booking/${id}/request-cancel`, { method: "PUT" });
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(result.error || "Request failed");
+        alert("Cancellation request submitted. Admin will confirm shortly.");
+        loadMyBookings();
+    } catch (err) { alert("❌ " + err.message); }
 }
 
 function AddDetails() {
     const emailEl = document.getElementById("email");
-    const deptEl = document.getElementById("department");
+    const deptEl  = document.getElementById("department");
     const phoneEl = document.getElementById("phone");
-    const btn = document.getElementById("submitBtn");
+    const btn     = document.getElementById("submitBtn");
 
     const data = {
         email: emailEl.value.trim(),
@@ -194,7 +275,7 @@ function AddDetails() {
         phone: parseInt(phoneEl.value)
     };
 
-    if (!data.email) { alert("Enter Email"); return; }
+    if (!data.email)      { alert("Enter Email"); return; }
     if (!data.department) { alert("Enter Department"); return; }
     if (isNaN(data.phone)) { alert("Enter valid phone number"); return; }
 
@@ -211,24 +292,22 @@ function AddDetails() {
     .then(() => {
         alert("Details saved!");
         emailEl.disabled = true;
-        deptEl.disabled = true;
+        deptEl.disabled  = true;
         phoneEl.disabled = true;
-        btn.textContent = "Edit";
-        btn.onclick = enableEdit;
+        btn.textContent  = "Edit";
+        btn.onclick      = enableEdit;
     })
     .catch(err => alert("Error: " + err.message));
 }
 
 function enableEdit() {
-    document.getElementById("email").disabled = false;
+    document.getElementById("email").disabled      = false;
     document.getElementById("department").disabled = false;
-    document.getElementById("phone").disabled = false;
+    document.getElementById("phone").disabled      = false;
     const btn = document.getElementById("submitBtn");
     btn.textContent = "Save Info";
     btn.onclick = AddDetails;
 }
-
-loadHistory();
 </script>
 </body>
 </html>

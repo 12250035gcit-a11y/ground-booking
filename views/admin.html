@@ -7,22 +7,69 @@
     <link rel="stylesheet" href="css/home.css">
     <style>
         .pending-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--red);
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            margin-left: 6px;
-            line-height: 1;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--red); color: white; font-size: 10px; font-weight: 700;
+            width: 18px; height: 18px; border-radius: 50%; margin-left: 6px; line-height: 1;
         }
-        .badge-pending  { background: #fff3cd; color: #7d5a00; }
-        .badge-approved { background: #d8f3dc; color: #1a3a2a; }
-        .badge-rejected { background: #fde8e8; color: #8b1a1a; }
+        .badge-pending          { background: #fff3cd; color: #7d5a00; }
+        .badge-approved         { background: #d8f3dc; color: #1a3a2a; }
+        .badge-rejected         { background: #fde8e8; color: #8b1a1a; }
+        .badge-cancel_requested { background: #fff0e0; color: #7d4000; }
+        .badge-cancelled        { background: #f0f0f0; color: #555; }
+
+        /* Action buttons — bigger and clearer */
+        .btn-approve {
+            background: var(--green-mid); color: white; border: none;
+            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: inherit; font-size: 12px; font-weight: 700;
+            transition: background var(--transition); white-space: nowrap;
+        }
+        .btn-approve:hover { background: var(--green-dark); }
+
+        .btn-reject {
+            background: #fde8e8; color: #8b1a1a; border: 1px solid #f5c6c6;
+            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: inherit; font-size: 12px; font-weight: 700;
+            transition: background var(--transition); white-space: nowrap;
+        }
+        .btn-reject:hover { background: #f5c6c6; }
+
+        .btn-confirm-cancel {
+            background: #d8f3dc; color: #1a3a2a; border: 1px solid #a8d5b5;
+            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: inherit; font-size: 12px; font-weight: 700; white-space: nowrap;
+        }
+        .btn-confirm-cancel:hover { background: #b7e4c7; }
+
+        .btn-deny-cancel {
+            background: #fff3cd; color: #7d5a00; border: 1px solid #ffd966;
+            padding: 7px 14px; border-radius: var(--radius-sm); cursor: pointer;
+            font-family: inherit; font-size: 12px; font-weight: 700; white-space: nowrap;
+        }
+        .btn-deny-cancel:hover { background: #ffd966; }
+
+        .action-cell { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+        .empty-state i { font-size: 24px; margin-bottom: 8px; display: block; color: var(--green-light); }
+
+        /* Auto-reject notice */
+        .auto-reject-notice {
+            background: #fff0e0; border: 1px solid #ffc896; border-radius: var(--radius-sm);
+            padding: 10px 14px; font-size: 12px; color: #7d4000; margin-bottom: 12px;
+            display: none;
+        }
+
+        /* Section divider inside approvals tab */
+        .section-divider {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 0 6px; color: var(--text-muted);
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .section-divider::before, .section-divider::after {
+            content: ""; flex: 1; height: 1px; background: var(--border);
+        }
     </style>
 </head>
 <body>
@@ -35,13 +82,9 @@
             <div class="nav-logo-sub">Admin Dashboard</div>
         </div>
     </div>
-
     <nav id="mainNav">
-        <ul>
-            <li><a href="admin.html" class="active-link">Dashboard</a></li>
-        </ul>
+        <ul><li><a href="admin.html" class="active-link">Dashboard</a></li></ul>
     </nav>
-
     <button class="btn-logout" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     <button class="hamburger" onclick="toggleNav()" aria-label="Toggle navigation">
         <span></span><span></span><span></span>
@@ -50,13 +93,13 @@
 
 <div class="page-hero">
     <h1>Admin Dashboard</h1>
-    <p>Manage user registrations and ground booking approvals</p>
+    <p>Manage user registrations, booking approvals, and cancellation requests</p>
 </div>
 
 <div class="admin-layout">
 
     <!-- Stats -->
-    <div class="admin-stats" id="statsRow">
+    <div class="admin-stats">
         <div class="stat-card">
             <div class="num" id="statTotal">–</div>
             <div class="lbl">Total Users</div>
@@ -67,16 +110,18 @@
         </div>
         <div class="stat-card">
             <div class="num" id="statPendingBookings">–</div>
-            <div class="lbl">Pending Bookings</div>
+            <div class="lbl">Pending Approvals</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statCancelRequests">–</div>
+            <div class="lbl">Cancel Requests</div>
         </div>
     </div>
 
     <!-- Tabs -->
     <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchTab('users', this)">User Registrations</button>
-        <button class="admin-tab" id="bookingTabBtn" onclick="switchTab('bookings', this)">
-            Booking Approvals
-        </button>
+        <button class="admin-tab" id="bookingTabBtn" onclick="switchTab('bookings', this)">Booking Approvals</button>
         <button class="admin-tab" onclick="switchTab('allbookings', this)">All Bookings</button>
     </div>
 
@@ -86,8 +131,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Student ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
@@ -95,30 +138,54 @@
                     </tr>
                 </thead>
                 <tbody id="usersList">
-                    <tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>
+                    <tr><td colspan="4" style="text-align:center;padding:20px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Booking Approvals Tab -->
+    <!-- Booking Approvals Tab (pending + cancel requests) -->
     <div class="tab-pane" id="tab-bookings">
+        <div id="autoRejectNotice" class="auto-reject-notice"></div>
+
+        <!-- Pending Bookings -->
+        <div class="section-divider">Pending Approval</div>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#</th>
                         <th>Email</th>
                         <th>Type</th>
                         <th>Date</th>
                         <th>Time</th>
+                        <th>Submitted</th>
                         <th>Notes</th>
-                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="pendingBookingsList">
                     <tr><td colspan="8" style="text-align:center;padding:20px;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Cancel Requests -->
+        <div class="section-divider" style="margin-top:20px;">Cancellation Requests</div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Email</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="cancelRequestsList">
+                    <tr><td colspan="6" style="text-align:center;padding:20px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -130,7 +197,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#</th>
                         <th>Email</th>
                         <th>Type</th>
                         <th>Date</th>
@@ -162,10 +229,7 @@ function switchTab(name, btn) {
     document.getElementById('tab-' + name).classList.add('active');
     btn.classList.add('active');
 }
-
-function toggleNav() {
-    document.getElementById('mainNav').classList.toggle('open');
-}
+function toggleNav() { document.getElementById('mainNav').classList.toggle('open'); }
 
 document.addEventListener("DOMContentLoaded", () => {
     loadUsersWithStats();
@@ -188,104 +252,187 @@ async function loadAllBookingsWithStats() {
         const bookings = await res.json();
         const list = Array.isArray(bookings) ? bookings : [];
 
-        const pending = list.filter(b => b.status === "pending");
+        const pending  = list.filter(b => b.status === "pending");
+        const cancels  = list.filter(b => b.status === "cancel_requested");
 
         renderAdminBookings(list);
-        renderPendingBookings(pending);
+        renderPendingBookings(pending, list);
+        renderCancelRequests(cancels);
 
-        document.getElementById("statBookings").textContent = list.length;
+        document.getElementById("statBookings").textContent       = list.length;
         document.getElementById("statPendingBookings").textContent = pending.length;
+        document.getElementById("statCancelRequests").textContent  = cancels.length;
 
-        // Show badge on tab if there are pending bookings
+        const totalActions = pending.length + cancels.length;
         const tabBtn = document.getElementById("bookingTabBtn");
         tabBtn.innerHTML = 'Booking Approvals' +
-            (pending.length ? `<span class="pending-badge">${pending.length}</span>` : '');
+            (totalActions ? `<span class="pending-badge">${totalActions}</span>` : '');
 
     } catch(e) { console.error(e); }
 }
 
 function statusBadge(status) {
     const map = {
-        pending:  { cls: "badge-pending",  label: '<i class="fas fa-clock"></i> Pending' },
-        approved: { cls: "badge-approved", label: '<i class="fas fa-check-circle"></i> Approved' },
-        rejected: { cls: "badge-rejected", label: '<i class="fas fa-times-circle"></i> Rejected' },
+        pending:          { cls: "badge-pending",          label: '<i class="fas fa-clock"></i> Pending' },
+        approved:         { cls: "badge-approved",         label: '<i class="fas fa-check-circle"></i> Approved' },
+        rejected:         { cls: "badge-rejected",         label: '<i class="fas fa-times-circle"></i> Rejected' },
+        cancel_requested: { cls: "badge-cancel_requested", label: '<i class="fas fa-hourglass-half"></i> Cancel Req.' },
+        cancelled:        { cls: "badge-cancelled",        label: '<i class="fas fa-ban"></i> Cancelled' },
     };
     const s = map[status] || { cls: "badge-pending", label: status };
     return `<span class="status-badge ${s.cls}">${s.label}</span>`;
 }
 
-function renderPendingBookings(bookings) {
+// Returns IDs of bookings whose time overlaps with booking b (among the pending list)
+function conflictingIds(b, pendingList) {
+    return pendingList
+        .filter(p => p.id !== b.id && p.date === b.date && p.starting_time < b.ending_time && p.ending_time > b.starting_time)
+        .map(p => p.id);
+}
+
+function renderPendingBookings(pending, allBookings) {
     const tbody = document.getElementById("pendingBookingsList");
     if (!tbody) return;
-    tbody.innerHTML = "";
 
-    if (!bookings.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);"><i class="fas fa-check-circle" style="color:var(--green-light);margin-right:6px;"></i>No pending bookings — all caught up!</td></tr>`;
+    if (!pending.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-check-circle"></i>No pending bookings — all caught up!</div></td></tr>`;
         return;
     }
 
-    bookings.forEach(b => {
-        const row = document.createElement("tr");
-        row.id = `pending-row-${b.id}`;
-        row.innerHTML = `
+    tbody.innerHTML = pending.map(b => {
+        const conflicts = conflictingIds(b, pending);
+        const conflictWarning = conflicts.length
+            ? `<span title="Conflicts with booking #${conflicts.join(', #')}" style="color:#e63946;font-size:11px;font-weight:700;margin-left:4px;cursor:help;">⚠ Conflict</span>` : '';
+        const submittedAt = b.created_at ? b.created_at.substring(0, 16) : '–';
+        return `
+        <tr id="pending-row-${b.id}">
+            <td>${b.id}${conflictWarning}</td>
+            <td><strong>${b.student_id}</strong></td>
+            <td>${b.match_type || "–"}</td>
+            <td>${b.date}</td>
+            <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
+            <td style="font-size:11px;color:var(--text-muted);">${submittedAt}</td>
+            <td style="max-width:140px;font-size:12px;color:var(--text-muted);">${b.notes || "–"}</td>
+            <td class="action-cell">
+                <button class="btn-approve" onclick="approveBooking(${b.id})"><i class="fas fa-check"></i> Approve</button>
+                <button class="btn-reject"  onclick="rejectBooking(${b.id})"><i class="fas fa-times"></i> Reject</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function renderCancelRequests(cancels) {
+    const tbody = document.getElementById("cancelRequestsList");
+    if (!tbody) return;
+
+    if (!cancels.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-check-circle"></i>No cancellation requests.</div></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = cancels.map(b => `
+        <tr id="cancel-row-${b.id}">
             <td>${b.id}</td>
             <td><strong>${b.student_id}</strong></td>
             <td>${b.match_type || "–"}</td>
             <td>${b.date}</td>
-            <td>${b.starting_time} – ${b.ending_time}</td>
-            <td style="max-width:160px;font-size:12px;color:var(--text-muted);">${b.notes || "–"}</td>
-            <td>${statusBadge(b.status)}</td>
+            <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
             <td class="action-cell">
-                <button class="btn-approve" onclick="approveBooking(${b.id})">Approve</button>
-                <button class="btn-reject"  onclick="rejectBooking(${b.id})">Reject</button>
+                <button class="btn-confirm-cancel" onclick="approveCancelBooking(${b.id})"><i class="fas fa-check"></i> Confirm Cancel</button>
+                <button class="btn-deny-cancel"    onclick="denyCancelBooking(${b.id})"><i class="fas fa-times"></i> Deny</button>
             </td>
-        `;
-        tbody.appendChild(row);
-    });
+        </tr>`
+    ).join('');
 }
 
 function renderAdminBookings(bookings) {
     const tbody = document.getElementById("adminBookingsList");
     if (!tbody) return;
-    tbody.innerHTML = "";
 
     if (!bookings.length) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">No bookings found</td></tr>`;
         return;
     }
 
-    bookings.forEach(b => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
+    tbody.innerHTML = bookings.map(b => `
+        <tr>
             <td>${b.id}</td>
-            <td>${b.student_id}</td>
+            <td style="font-size:12px;">${b.student_id}</td>
             <td>${b.match_type || "–"}</td>
             <td>${b.date}</td>
-            <td>${b.starting_time} – ${b.ending_time}</td>
+            <td style="white-space:nowrap;">${b.starting_time} – ${b.ending_time}</td>
             <td>${statusBadge(b.status)}</td>
             <td>
-                <button class="btn-reject" onclick="deleteAdminBooking(${b.id})">Delete</button>
+                <button class="btn-reject" onclick="deleteAdminBooking(${b.id})"><i class="fas fa-trash"></i> Delete</button>
             </td>
-        `;
-        tbody.appendChild(row);
-    });
+        </tr>`
+    ).join('');
+}
+
+function renderUsers(users) {
+    const tbody = document.getElementById("usersList");
+    if (!tbody) return;
+
+    if (!users.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;">No users found</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+        <tr id="user-row-${u.id}">
+            <td>${u.first_name} ${u.last_name}</td>
+            <td>${u.email}</td>
+            <td>${u.phone || "–"}</td>
+            <td class="action-cell">
+                <button class="btn-reject" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i> Delete</button>
+            </td>
+        </tr>`
+    ).join('');
 }
 
 async function approveBooking(id) {
-    if (!confirm("Approve this booking?")) return;
+    if (!confirm("Approve this booking? Conflicting pending bookings will be automatically rejected.")) return;
     try {
         const res = await fetch(`/booking/${id}/approve`, { method: "PUT" });
-        if (res.ok) loadAllBookingsWithStats();
-        else alert("Failed to approve booking");
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            alert("Failed: " + (result.error || "Unknown error"));
+            return;
+        }
+        const notice = document.getElementById("autoRejectNotice");
+        if (result.auto_rejected > 0) {
+            notice.textContent = `✅ Booking #${id} approved. ${result.auto_rejected} conflicting request(s) were automatically rejected.`;
+            notice.style.display = "block";
+            setTimeout(() => { notice.style.display = "none"; }, 6000);
+        }
+        loadAllBookingsWithStats();
     } catch { alert("Server error"); }
 }
 
 async function rejectBooking(id) {
-    if (!confirm("Reject this booking?")) return;
+    if (!confirm("Reject this booking request?")) return;
     try {
         const res = await fetch(`/booking/${id}/reject`, { method: "PUT" });
         if (res.ok) loadAllBookingsWithStats();
         else alert("Failed to reject booking");
+    } catch { alert("Server error"); }
+}
+
+async function approveCancelBooking(id) {
+    if (!confirm("Confirm this cancellation? The slot will become available again.")) return;
+    try {
+        const res = await fetch(`/booking/${id}/approve-cancel`, { method: "PUT" });
+        if (res.ok) loadAllBookingsWithStats();
+        else alert("Failed to confirm cancellation");
+    } catch { alert("Server error"); }
+}
+
+async function denyCancelBooking(id) {
+    if (!confirm("Deny this cancellation request? The booking will remain approved.")) return;
+    try {
+        const res = await fetch(`/booking/${id}/deny-cancel`, { method: "PUT" });
+        if (res.ok) loadAllBookingsWithStats();
+        else alert("Failed to deny cancellation");
     } catch { alert("Server error"); }
 }
 
@@ -295,6 +442,15 @@ async function deleteAdminBooking(id) {
         const res = await fetch(`/booking/${id}`, { method: "DELETE" });
         if (res.ok) loadAllBookingsWithStats();
         else alert("Failed to delete booking");
+    } catch { alert("Server error"); }
+}
+
+async function deleteUser(id) {
+    if (!confirm("Delete this user? This cannot be undone.")) return;
+    try {
+        const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
+        if (res.ok) loadUsersWithStats();
+        else alert("Failed to delete user");
     } catch { alert("Server error"); }
 }
 </script>
