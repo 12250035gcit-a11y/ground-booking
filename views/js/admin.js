@@ -1,7 +1,9 @@
+/* admin.js — auth helpers only (login page + logout button) */
+
 function adminLogin() {
     const data = {
-        email: document.getElementById("email").value.trim(),
-        password: document.getElementById("password").value.trim()
+        email:    document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value.trim(),
     };
 
     if (!data.email || !data.password) {
@@ -12,7 +14,7 @@ function adminLogin() {
     fetch("/admin/login", {
         method: "POST",
         body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
     })
     .then(res => res.json().then(result => ({ ok: res.ok, result })))
     .then(({ ok, result }) => {
@@ -40,110 +42,3 @@ function showError(msg) {
         gcitToast(msg, "error");
     }
 }
-
-// ---- Admin Dashboard ----
-
-async function loadUsers() {
-    try {
-        const res = await fetch("/admin/users");
-        const users = await res.json();
-        renderUsers(Array.isArray(users) ? users : []);
-    } catch {
-        console.error("Failed to load users");
-    }
-}
-
-function renderUsers(users) {
-    const tbody = document.getElementById("usersList");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!users.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;">No users found</td></tr>`;
-        return;
-    }
-
-    users.forEach(u => {
-        const row = document.createElement("tr");
-        row.id = `user-row-${u.id}`;
-        row.innerHTML = `
-            <td>${u.id}</td>
-            <td style="font-size:11px;color:var(--text-muted);font-family:monospace;">${u.student_id || "–"}</td>
-            <td>${u.first_name} ${u.last_name}</td>
-            <td>${u.email}</td>
-            <td>${u.phone || "–"}</td>
-            <td class="action-cell">
-                <button class="btn-reject" onclick="deleteUser(${u.id})">Delete</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-async function deleteUser(id) {
-    const ok = typeof gcitConfirm === "function"
-        ? await gcitConfirm({ title: "Delete user?", message: "All their data will be permanently removed.", confirmText: "Delete", danger: true })
-        : confirm("Delete this user? This cannot be undone.");
-    if (!ok) return;
-    try {
-        const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
-        if (res.ok) { if (typeof gcitToast === "function") gcitToast("User deleted.", "info"); loadUsersWithStats(); }
-        else if (typeof gcitToast === "function") gcitToast("Failed to delete user", "error");
-    } catch {
-        if (typeof gcitToast === "function") gcitToast("Server error", "error");
-    }
-}
-
-async function loadAdminBookings() {
-    try {
-        const res = await fetch("/bookings");
-        const bookings = await res.json();
-        renderAdminBookings(Array.isArray(bookings) ? bookings : []);
-    } catch {
-        console.error("Failed to load bookings");
-    }
-}
-
-function renderAdminBookings(bookings) {
-    const tbody = document.getElementById("adminBookingsList");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!bookings.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;">No bookings</td></tr>`;
-        return;
-    }
-
-    bookings.forEach(b => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${b.id}</td>
-            <td>${b.student_id}</td>
-            <td>${b.match_type || "-"}</td>
-            <td>${b.date}</td>
-            <td>${b.starting_time} – ${b.ending_time}</td>
-            <td>
-                <button class="btn-reject" onclick="deleteAdminBooking(${b.id})">Delete</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-async function deleteAdminBooking(id) {
-    const ok = typeof gcitConfirm === "function"
-        ? await gcitConfirm({ title: "Delete booking?", message: "This action cannot be undone.", confirmText: "Delete", danger: true })
-        : confirm("Delete this booking?");
-    if (!ok) return;
-    try {
-        const res = await fetch(`/booking/${id}`, { method: "DELETE" });
-        if (res.ok) loadAdminBookings();
-    } catch {
-        if (typeof gcitToast === "function") gcitToast("Failed to delete booking", "error");
-    }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    if (document.getElementById("usersList")) loadUsers();
-    if (document.getElementById("adminBookingsList")) loadAdminBookings();
-});
