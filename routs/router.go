@@ -32,15 +32,19 @@ func Router() {
 	// Slots
 	router.HandleFunc("/api/slots", controller.GetSlots).Methods("GET")
 
-	// Bookings
+	// Bookings — order matters: specific paths before parameterized ones
 	router.HandleFunc("/booking", controller.CreateBooking).Methods("POST")
 	router.HandleFunc("/bookings", controller.GetAllBookings).Methods("GET")
 	router.HandleFunc("/bookings/date/{date}", controller.GetBookingsByDate).Methods("GET")
+	router.HandleFunc("/bookings/date/{date}/all", controller.GetActiveBookingsByDate).Methods("GET")
 	router.HandleFunc("/booking/{id}", controller.GetBookingByID).Methods("GET")
 	router.HandleFunc("/booking/{id}", controller.UpdateBooking).Methods("PUT")
 	router.HandleFunc("/booking/{id}", controller.DeleteBooking).Methods("DELETE")
 	router.HandleFunc("/booking/{id}/approve", controller.ApproveBooking).Methods("PUT")
 	router.HandleFunc("/booking/{id}/reject", controller.RejectBooking).Methods("PUT")
+	router.HandleFunc("/booking/{id}/request-cancel", controller.RequestCancelBooking).Methods("PUT")
+	router.HandleFunc("/booking/{id}/approve-cancel", controller.ApproveCancelBooking).Methods("PUT")
+	router.HandleFunc("/booking/{id}/deny-cancel", controller.DenyCancelBooking).Methods("PUT")
 
 	// Static files
 	fs := http.FileServer(http.Dir("./views"))
