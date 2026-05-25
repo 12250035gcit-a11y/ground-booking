@@ -1,7 +1,6 @@
 const API = "";
 const MAX_BOOKING_MINUTES = 90;
 
-// Timeline range: 06:00 – 22:00
 const TIMELINE_START = 6;
 const TIMELINE_END   = 22;
 const TIMELINE_HOURS = TIMELINE_END - TIMELINE_START;
@@ -31,14 +30,8 @@ function prefillFromURL() {
         if (dateEl) dateEl.value = date;
         if (tlDate) tlDate.value = date;
     }
-    if (start) {
-        const sel = document.getElementById("startTime");
-        if (sel) sel.value = start;
-    }
-    if (end) {
-        const sel = document.getElementById("endTime");
-        if (sel) sel.value = end;
-    }
+    if (start) { const s = document.getElementById("startTime"); if (s) s.value = start; }
+    if (end)   { const e = document.getElementById("endTime");   if (e) e.value = end; }
 }
 
 function setupDate() {
@@ -49,7 +42,7 @@ function setupDate() {
     if (tlDate)    { tlDate.value = today; }
 }
 
-/* ===== TIMELINE ===== */
+/* ── Timeline ── */
 
 function buildTimelineHours() {
     const container = document.getElementById("timelineHours");
@@ -69,30 +62,27 @@ function timeToFraction(timeStr) {
     return (h + m / 60 - TIMELINE_START) / TIMELINE_HOURS;
 }
 
-// Uses /all endpoint so pending bookings are visible to everyone
 async function loadTimeline() {
     const date = document.getElementById("timelineDate")?.value;
     if (!date) return;
-
     const bar   = document.getElementById("timelineBar");
     const chips = document.getElementById("bookedChips");
     if (!bar || !chips) return;
 
     bar.querySelectorAll(".timeline-booked-slot").forEach(el => el.remove());
-    chips.innerHTML = '<span style="font-size:13px;color:var(--text-muted);">Loading...</span>';
+    chips.innerHTML = '<span style="font-size:13px;color:var(--text-muted);">Loading…</span>';
 
     try {
-        const res = await fetch(`${API}/bookings/date/${date}/all`);
+        const res  = await fetch(`${API}/bookings/date/${date}/all`);
         const data = await res.json();
         const bookings = Array.isArray(data) ? data : [];
 
         if (!bookings.length) {
-            chips.innerHTML = '<span class="no-bookings-msg"><i class="fas fa-check-circle"></i> No bookings — ground is free all day!</span>';
+            chips.innerHTML = '<span class="no-bookings-msg"><i class="fas fa-check-circle"></i> Ground is free all day!</span>';
             return;
         }
 
         chips.innerHTML = "";
-
         bookings.forEach(b => {
             const startFrac = timeToFraction(b.starting_time);
             const endFrac   = timeToFraction(b.ending_time);
@@ -106,21 +96,18 @@ async function loadTimeline() {
             slot.className = "timeline-booked-slot" + (isPending ? " timeline-pending-slot" : "");
             slot.style.left  = left + "%";
             slot.style.width = width + "%";
-            const statusLabel = isPending ? "Pending" : (b.status === "cancel_requested" ? "Cancel Req." : "Approved");
-            slot.title = `${b.student_id} · ${b.match_type || "Booking"} · ${b.starting_time}–${b.ending_time} [${statusLabel}]`;
+            const lbl = isPending ? "Pending" : (b.status === "cancel_requested" ? "Cancel req." : "Approved");
+            slot.title = `${b.student_id} · ${b.match_type || "Booking"} · ${b.starting_time}–${b.ending_time} [${lbl}]`;
             slot.innerHTML = `<span class="timeline-booked-label">${b.starting_time}–${b.ending_time}</span>`;
             bar.appendChild(slot);
 
             const chip = document.createElement("div");
             chip.className = "booked-chip" + (isPending ? " pending-chip" : "");
-            chip.innerHTML = `
-                <div class="booked-chip-dot${isPending ? ' pending-dot' : ''}"></div>
+            chip.innerHTML = `<div class="booked-chip-dot${isPending ? ' pending-dot' : ''}"></div>
                 <strong>${b.starting_time}–${b.ending_time}</strong>&nbsp;·&nbsp;${b.student_id}&nbsp;(${b.match_type || "–"})
-                <span style="font-size:10px;opacity:0.7;margin-left:3px;">[${statusLabel}]</span>
-            `;
+                <span style="font-size:10px;opacity:0.65;margin-left:2px;">[${lbl}]</span>`;
             chips.appendChild(chip);
         });
-
     } catch {
         chips.innerHTML = '<span style="color:var(--text-muted);font-size:13px;">Could not load availability.</span>';
     }
@@ -132,21 +119,18 @@ function syncTimeline() {
     if (tlDate && bookDate) { tlDate.value = bookDate; loadTimeline(); }
 }
 
-/* ===== MY BOOKINGS TABLE ===== */
+/* ── My Bookings table ── */
 
 async function loadBookings() {
     const tbody = document.getElementById("bookingsList");
     if (!tbody) return;
     try {
-        const res = await fetch(`${API}/bookings`);
+        const res  = await fetch(`${API}/bookings`);
         if (!res.ok) throw new Error(`Server error ${res.status}`);
         const data = await res.json();
-        const all = Array.isArray(data) ? data : [];
-        // Show only the current user's bookings
-        const mine = all.filter(b => b.student_id === _user.email);
+        const mine = (Array.isArray(data) ? data : []).filter(b => b.student_id === _user.email);
         renderBookings(mine);
-    } catch (err) {
-        console.error("Load error:", err);
+    } catch {
         renderBookings([]);
     }
 }
@@ -169,19 +153,12 @@ function renderBookings(bookings) {
     tbody.innerHTML = "";
 
     if (!bookings || bookings.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">
-                    No bookings yet. Submit your first request above!
-                </td>
-            </tr>
-        `;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No bookings yet. Submit your first request above!</td></tr>`;
         return;
     }
 
     bookings.forEach(b => {
         let actionCell = `<span style="font-size:12px;color:var(--text-muted);">–</span>`;
-
         if (b.status === "pending" || b.status === "rejected") {
             actionCell = `<button class="delete-btn" onclick="deleteBooking(${b.id})">Delete</button>`;
         } else if (b.status === "approved") {
@@ -189,20 +166,18 @@ function renderBookings(bookings) {
         } else if (b.status === "cancel_requested") {
             actionCell = `<span style="font-size:12px;color:var(--text-muted);font-style:italic;">Awaiting admin</span>`;
         }
-
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${b.match_type || "–"}</td>
             <td>${b.date || "–"}</td>
             <td style="white-space:nowrap;">${b.starting_time || "–"} – ${b.ending_time || "–"}</td>
             <td>${statusBadge(b.status)}</td>
-            <td>${actionCell}</td>
-        `;
+            <td>${actionCell}</td>`;
         tbody.appendChild(row);
     });
 }
 
-/* ===== SUBMIT BOOKING ===== */
+/* ── Submit Booking ── */
 
 async function submitBooking() {
     const data = {
@@ -211,25 +186,22 @@ async function submitBooking() {
         date:          document.getElementById("bookDate").value,
         starting_time: document.getElementById("startTime").value,
         ending_time:   document.getElementById("endTime").value,
-        notes:         document.getElementById("notes").value
+        notes:         document.getElementById("notes").value,
     };
 
     if (!data.student_id || !data.match_type || !data.date || !data.starting_time || !data.ending_time) {
-        alert("Please fill all required fields");
+        gcitToast("Please fill in all required fields.", "error");
         return;
     }
-
     if (data.starting_time >= data.ending_time) {
-        alert("End time must be after start time");
+        gcitToast("End time must be after start time.", "error");
         return;
     }
 
-    // Enforce 1.5-hour max on the frontend
     const [sh, sm] = data.starting_time.split(":").map(Number);
     const [eh, em] = data.ending_time.split(":").map(Number);
-    const durationMins = (eh * 60 + em) - (sh * 60 + sm);
-    if (durationMins > MAX_BOOKING_MINUTES) {
-        alert("Bookings cannot exceed 1.5 hours (90 minutes).");
+    if ((eh * 60 + em) - (sh * 60 + sm) > MAX_BOOKING_MINUTES) {
+        gcitToast("Bookings cannot exceed 1.5 hours.", "error");
         return;
     }
 
@@ -237,56 +209,60 @@ async function submitBooking() {
         const res = await fetch(`${API}/booking`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
         });
-
         const result = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(result.error || "Booking failed");
 
-        if (!res.ok) {
-            throw new Error(result.error || "Booking failed");
-        }
-
-        alert("✅ Booking request submitted!\n\nYour booking is pending admin approval. Check the status in 'My Bookings' on your profile.");
+        gcitToast("Booking request submitted — pending admin approval.");
         resetForm();
         loadBookings();
         loadTimeline();
-
     } catch (err) {
-        alert("❌ " + err.message);
+        gcitToast(err.message, "error");
     }
 }
 
 async function deleteBooking(id) {
-    if (!confirm("Delete this booking request?")) return;
+    const ok = await gcitConfirm({ title: "Delete booking?", message: "This request will be permanently removed.", confirmText: "Delete", danger: true });
+    if (!ok) return;
     try {
         const res = await fetch(`${API}/booking/${id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Delete failed");
+        gcitToast("Booking removed.");
         loadBookings();
         loadTimeline();
     } catch (err) {
-        alert(err.message);
+        gcitToast(err.message, "error");
     }
 }
 
 async function requestCancelBooking(id) {
-    if (!confirm("Request cancellation of this approved booking?\n\nAn admin will confirm and the slot will be freed.")) return;
+    const ok = await gcitConfirm({
+        title: "Request cancellation?",
+        message: "An admin will review and confirm. The slot will be freed once approved.",
+        confirmText: "Send Request",
+    });
+    if (!ok) return;
     try {
         const res = await fetch(`${API}/booking/${id}/request-cancel`, { method: "PUT" });
         const result = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(result.error || "Request failed");
-        alert("Cancellation request submitted. The admin will confirm shortly.");
+        gcitToast("Cancellation request sent.");
         loadBookings();
         loadTimeline();
     } catch (err) {
-        alert("❌ " + err.message);
+        gcitToast(err.message, "error");
     }
 }
 
 function resetForm() {
     document.getElementById("studentId").value = _user.email || "";
-    document.getElementById("purpose").value = "";
+    document.getElementById("purpose").value   = "";
     document.getElementById("startTime").value = "";
-    document.getElementById("endTime").value = "";
-    document.getElementById("notes").value = "";
+    document.getElementById("endTime").value   = "";
+    document.getElementById("notes").value     = "";
+    const hint = document.getElementById("durationHint");
+    if (hint) hint.textContent = "";
     setupDate();
 }

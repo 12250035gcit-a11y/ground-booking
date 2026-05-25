@@ -54,13 +54,6 @@
         .empty-state { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
         .empty-state i { font-size: 24px; margin-bottom: 8px; display: block; color: var(--green-light); }
 
-        /* Auto-reject notice */
-        .auto-reject-notice {
-            background: #fff0e0; border: 1px solid #ffc896; border-radius: var(--radius-sm);
-            padding: 10px 14px; font-size: 12px; color: #7d4000; margin-bottom: 12px;
-            display: none;
-        }
-
         /* Section divider inside approvals tab */
         .section-divider {
             display: flex; align-items: center; gap: 10px;
@@ -146,8 +139,6 @@
 
     <!-- Booking Approvals Tab (pending + cancel requests) -->
     <div class="tab-pane" id="tab-bookings">
-        <div id="autoRejectNotice" class="auto-reject-notice"></div>
-
         <!-- Pending Bookings -->
         <div class="section-divider">Pending Approval</div>
         <div class="table-wrap">
@@ -221,6 +212,7 @@
     Admin Panel &copy; 2025
 </footer>
 
+<script src="js/ui.js"></script>
 <script src="js/admin.js"></script>
 <script>
 function switchTab(name, btn) {
@@ -391,67 +383,73 @@ function renderUsers(users) {
 }
 
 async function approveBooking(id) {
-    if (!confirm("Approve this booking? Conflicting pending bookings will be automatically rejected.")) return;
+    const ok = await gcitConfirm({
+        title: "Approve booking?",
+        message: "Any other pending requests for this slot will be automatically rejected.",
+        confirmText: "Approve",
+    });
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/approve`, { method: "PUT" });
         const result = await res.json().catch(() => ({}));
-        if (!res.ok) {
-            alert("Failed: " + (result.error || "Unknown error"));
-            return;
-        }
-        const notice = document.getElementById("autoRejectNotice");
+        if (!res.ok) { gcitToast(result.error || "Approval failed", "error"); return; }
         if (result.auto_rejected > 0) {
-            notice.textContent = `✅ Booking #${id} approved. ${result.auto_rejected} conflicting request(s) were automatically rejected.`;
-            notice.style.display = "block";
-            setTimeout(() => { notice.style.display = "none"; }, 6000);
+            gcitToast(`Booking approved. ${result.auto_rejected} conflicting request(s) auto-rejected.`, "info", 5000);
+        } else {
+            gcitToast("Booking approved.");
         }
         loadAllBookingsWithStats();
-    } catch { alert("Server error"); }
+    } catch { gcitToast("Server error", "error"); }
 }
 
 async function rejectBooking(id) {
-    if (!confirm("Reject this booking request?")) return;
+    const ok = await gcitConfirm({ title: "Reject booking?", message: "The user will see this request as rejected.", confirmText: "Reject", danger: true });
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/reject`, { method: "PUT" });
-        if (res.ok) loadAllBookingsWithStats();
-        else alert("Failed to reject booking");
-    } catch { alert("Server error"); }
+        if (res.ok) { gcitToast("Booking rejected.", "info"); loadAllBookingsWithStats(); }
+        else gcitToast("Failed to reject booking", "error");
+    } catch { gcitToast("Server error", "error"); }
 }
 
 async function approveCancelBooking(id) {
-    if (!confirm("Confirm this cancellation? The slot will become available again.")) return;
+    const ok = await gcitConfirm({ title: "Confirm cancellation?", message: "The slot will become available again.", confirmText: "Confirm" });
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/approve-cancel`, { method: "PUT" });
-        if (res.ok) loadAllBookingsWithStats();
-        else alert("Failed to confirm cancellation");
-    } catch { alert("Server error"); }
+        if (res.ok) { gcitToast("Cancellation confirmed — slot is now free."); loadAllBookingsWithStats(); }
+        else gcitToast("Failed to confirm cancellation", "error");
+    } catch { gcitToast("Server error", "error"); }
 }
 
 async function denyCancelBooking(id) {
-    if (!confirm("Deny this cancellation request? The booking will remain approved.")) return;
+    const ok = await gcitConfirm({ title: "Deny cancellation?", message: "The booking will remain approved.", confirmText: "Deny", danger: true });
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}/deny-cancel`, { method: "PUT" });
-        if (res.ok) loadAllBookingsWithStats();
-        else alert("Failed to deny cancellation");
-    } catch { alert("Server error"); }
+        if (res.ok) { gcitToast("Cancellation request denied.", "info"); loadAllBookingsWithStats(); }
+        else gcitToast("Failed to deny cancellation", "error");
+    } catch { gcitToast("Server error", "error"); }
 }
 
 async function deleteAdminBooking(id) {
-    if (!confirm("Delete this booking permanently?")) return;
+    const ok = await gcitConfirm({ title: "Delete booking?", message: "This action cannot be undone.", confirmText: "Delete", danger: true });
+    if (!ok) return;
     try {
         const res = await fetch(`/booking/${id}`, { method: "DELETE" });
-        if (res.ok) loadAllBookingsWithStats();
-        else alert("Failed to delete booking");
-    } catch { alert("Server error"); }
+        if (res.ok) { gcitToast("Booking deleted.", "info"); loadAllBookingsWithStats(); }
+        else gcitToast("Failed to delete booking", "error");
+    } catch { gcitToast("Server error", "error"); }
 }
 
 async function deleteUser(id) {
-    if (!confirm("Delete this user? This cannot be undone.")) return;
+    const ok = await gcitConfirm({ title: "Delete user?", message: "All their data will be permanently removed.", confirmText: "Delete", danger: true });
+    if (!ok) return;
     try {
         const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
-        if (res.ok) loadUsersWithStats();
-        else alert("Failed to delete user");
-    } catch { alert("Server error"); }
+        if (res.ok) { gcitToast("User deleted.", "info"); loadUsersWithStats(); }
+        else gcitToast("Failed to delete user", "error");
+    } catch { gcitToast("Server error", "error"); }
 }
 </script>
 </body>
