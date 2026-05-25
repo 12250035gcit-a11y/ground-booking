@@ -417,7 +417,7 @@ function createFreeRow(startTime, endTime, isPast, date) {
     const content = document.createElement('div');
     if (isPast) {
         content.className = 'sched-slot-past';
-        content.innerHTML = `<span>—</span>`;
+        content.innerHTML = `<span style="font-style:italic;">Time has passed</span>`;
     } else {
         content.className = 'sched-slot-free';
         content.innerHTML = `
